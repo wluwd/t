@@ -1,0 +1,57 @@
+{
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"typescript.tsdk": "node_modules/typescript/lib",
+
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": "explicit",
+		"source.organizeImports": "never",
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+
+	"eslint.experimental.useFlatConfig": true,
+	"eslint.validate": [
+		"javascript",
+		"typescript",
+		"typescriptreact",
+		"json",
+		"jsonc",
+	],
+
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+	},
+
+	"typescript.preferences.importModuleSpecifier": "non-relative",
+	"javascript.preferences.importModuleSpecifier": "non-relative",
+	"javascript.preferences.importModuleSpecifierEnding": "js",
+	"typescript.preferences.importModuleSpecifierEnding": "js",
+
+	"todo-tree.general.tags": ["@info", "@todo"],
+	"todo-tree.regex.regexCaseSensitive": false,
+	"todo-tree.highlights.customHighlight": {
+		// @info using tailwind's colors: 700 for background, 200 for foreground
+		"@info": {
+			"background": "#0369a1",
+			"borderRadius": "0",
+			"foreground": "#bae6fd",
+			"gutterIcon": true,
+			"icon": "info",
+			"type": "whole-line",
+		},
+		"@todo": {
+			"background": "#047857",
+			"borderRadius": "0",
+			"foreground": "#a7f3d0",
+			"gutterIcon": true,
+			"icon": "checklist",
+			"type": "whole-line",
+		},
+	},
+}

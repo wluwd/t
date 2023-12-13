@@ -1,0 +1,7 @@
+{
+	"recommendations": [
+		"Gruntfuggly.todo-tree",
+		"dbaeumer.vscode-eslint",
+		"esbenp.prettier-vscode",
+	],
+}
