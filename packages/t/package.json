@@ -13,5 +13,8 @@
     "prelint": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "tsc"
+  },
+  "dependencies": {
+    "type-fest": "^4.8.3"
   }
 }
