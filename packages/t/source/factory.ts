@@ -6,6 +6,8 @@ import type { Get, Simplify, ValueOf } from "type-fest";
 
 export class UnknownDefaultLocaleStrategy extends Error {
 	details: {
+		availableLocales: Array<number | string | symbol>;
+		availableStrategies: Array<string>;
 		desiredFallback: number | string | symbol;
 		desiredStrategy: string;
 	};
@@ -152,6 +154,8 @@ export const createTranslationsFactory =
 					setLocale(localeNegotiator(Object.keys(translations), fallback));
 				} else {
 					throw new UnknownDefaultLocaleStrategy({
+						availableLocales: Object.keys(translations),
+						availableStrategies: ["auto"],
 						desiredFallback: fallback,
 						desiredStrategy: strategy,
 					});
