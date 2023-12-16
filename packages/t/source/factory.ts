@@ -22,8 +22,6 @@ export class UnknownDefaultLocaleStrategy extends Error {
 		);
 
 		this.details = details;
-
-		return this;
 	}
 }
 
@@ -43,8 +41,6 @@ export class UnknownDefaultLocale extends Error {
 		);
 
 		this.details = details;
-
-		return this;
 	}
 }
 
