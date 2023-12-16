@@ -94,9 +94,9 @@ export interface CreateTranslationsFactoryOptions<
 			factory: () => GetLocaleHook;
 			name: GetLocaleHookName;
 		};
+		negotiator: (availableLocales: string[], fallback: string) => string;
 		setter: SetLocale;
 	};
-	negotiator: (availableLocales: string[], fallback: string) => string;
 }
 
 export const createTranslationsFactory =
@@ -109,9 +109,9 @@ export const createTranslationsFactory =
 		lazyLoaders,
 		locale: {
 			getter: { factory: getLocaleHookFactory, name: getLocaleHookName },
+			negotiator: localeNegotiator,
 			setter: setLocale,
 		},
-		negotiator,
 	}: CreateTranslationsFactoryOptions<
 		GetTranslationsHookName,
 		GetLocaleHookName
@@ -146,7 +146,7 @@ export const createTranslationsFactory =
 				const [strategy, fallback] = defaultLocale;
 
 				if (strategy === "auto" && isKeyof(translations, fallback)) {
-					setLocale(negotiator(Object.keys(translations), fallback));
+					setLocale(localeNegotiator(Object.keys(translations), fallback));
 				} else {
 					throw new UnknownDefaultLocaleStrategy({
 						fallback,
