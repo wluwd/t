@@ -5,7 +5,10 @@ import type { Translator } from "~/translator.ts";
 import type { Get, Simplify, ValueOf } from "type-fest";
 
 export class UnknownDefaultLocaleStrategy extends Error {
-	details: { fallback: number | string | symbol; strategy: string };
+	details: {
+		desiredFallback: number | string | symbol;
+		desiredStrategy: string;
+	};
 
 	constructor(
 		details: UnknownDefaultLocaleStrategy["details"],
@@ -24,8 +27,8 @@ export class UnknownDefaultLocaleStrategy extends Error {
 
 export class UnknownDefaultLocale extends Error {
 	details: {
-		available: Array<number | string | symbol>;
-		locale: number | string | symbol;
+		availableLocales: Array<number | string | symbol>;
+		desiredLocale: number | string | symbol;
 	};
 
 	constructor(
@@ -149,16 +152,16 @@ export const createTranslationsFactory =
 					setLocale(localeNegotiator(Object.keys(translations), fallback));
 				} else {
 					throw new UnknownDefaultLocaleStrategy({
-						fallback,
-						strategy,
+						desiredFallback: fallback,
+						desiredStrategy: strategy,
 					});
 				}
 			} else if (isKeyof(translations, defaultLocale)) {
 				setLocale(defaultLocale);
 			} else {
 				throw new UnknownDefaultLocale({
-					available: Object.keys(translations),
-					locale: defaultLocale,
+					availableLocales: Object.keys(translations),
+					desiredLocale: defaultLocale,
 				});
 			}
 		}
