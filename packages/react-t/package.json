@@ -1,0 +1,17 @@
+{
+  "name": "@wluwd/react-t",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "prelint": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc"
+  }
+}
