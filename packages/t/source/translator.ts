@@ -1,4 +1,4 @@
-import type { UnionToIntersection } from "type-fest";
+import type { Simplify, UnionToIntersection } from "type-fest";
 
 type ExtractArguments<
 	Haystack extends string,
@@ -7,13 +7,13 @@ type ExtractArguments<
 	? ExtractArguments<Tail, [...Needles, Needle]>
 	: Needles extends []
 		? never
-		: UnionToIntersection<{
+		: {
 				[k in Needles[number]]: string;
-			}>;
+			};
 
 export type Translator = <
 	Translation extends string,
-	Data extends ExtractArguments<Translation>,
+	Data extends Simplify<UnionToIntersection<ExtractArguments<Translation>>>,
 >(
 	translation: Translation,
 	...[data]: [Data] extends [never] ? [data?: undefined] : [data: Data]
