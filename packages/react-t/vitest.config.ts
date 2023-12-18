@@ -15,6 +15,9 @@ export default mergeConfig(
 				"~": resolve(__dirname, "source"),
 			},
 		},
+		test: {
+			environment: "happy-dom",
+		},
 	},
 	true,
 );
