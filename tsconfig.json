@@ -6,5 +6,6 @@
 		"vitest.config.ts",
 		"vitest.workspace.ts",
 		"packages/*/vitest.config.ts",
+		"packages/*/tsup.config.ts",
 	],
 }
