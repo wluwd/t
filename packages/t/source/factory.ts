@@ -6,9 +6,9 @@ import type { Get, Simplify, ValueOf } from "type-fest";
 
 export class UnknownDefaultLocaleStrategy extends Error {
 	details: {
-		availableLocales: Array<number | string | symbol>;
+		availableLocales: Array<string>;
 		availableStrategies: Array<string>;
-		desiredFallback: number | string | symbol;
+		desiredFallback: string;
 		desiredStrategy: string;
 	};
 
@@ -17,7 +17,13 @@ export class UnknownDefaultLocaleStrategy extends Error {
 		options?: ErrorOptions,
 	) {
 		super(
-			"Unknown `defaultLocale` strategy, check `details` for details about attempted strategy and fallback.",
+			`Tried to use an unknown \`defaultLocale\` strategy (\`[${
+				details.desiredStrategy
+			}, ${
+				details.desiredFallback
+			}]\`).\n\nAvailable strategies: \`[${details.availableStrategies.join(
+				" | ",
+			)}, ${details.availableLocales.join(" | ")}]\`.`,
 			options,
 		);
 
@@ -27,8 +33,8 @@ export class UnknownDefaultLocaleStrategy extends Error {
 
 export class UnknownDefaultLocale extends Error {
 	details: {
-		availableLocales: Array<number | string | symbol>;
-		desiredLocale: number | string | symbol;
+		availableLocales: Array<string>;
+		desiredLocale: string;
 	};
 
 	constructor(
@@ -36,7 +42,9 @@ export class UnknownDefaultLocale extends Error {
 		options?: ErrorOptions,
 	) {
 		super(
-			"Unknown `defaultLocale`, check `details` for details about the default locale set and the available ones.",
+			`Tried to set an unknown \`defaultLocale\` (${
+				details.desiredLocale
+			}).\n\nAvailable locales: ${details.availableLocales.join(", ")}.`,
 			options,
 		);
 
