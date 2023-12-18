@@ -53,6 +53,26 @@ export class NoLocaleSet extends Error {
 	}
 }
 
+export class NoTranslationsSet extends Error {
+	details: {
+		availableLocales: Array<number | string>;
+		desiredLocale: number | string;
+	};
+
+	constructor(details: NoTranslationsSet["details"], options?: ErrorOptions) {
+		super(
+			`Tried to load translations for ${
+				details.desiredLocale
+			}, but no loader was found for that locale.\n\nAvailable locales: ${details.availableLocales.join(
+				", ",
+			)}.`,
+			options,
+		);
+
+		this.details = details;
+	}
+}
+
 type ConcatKeys<
 	Previous extends string,
 	New extends string,

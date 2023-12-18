@@ -1,5 +1,6 @@
 export {
 	NoLocaleSet,
+	NoTranslationsSet,
 	UnknownDefaultLocale,
 	UnknownDefaultLocaleStrategy,
 	createTranslationsFactory,

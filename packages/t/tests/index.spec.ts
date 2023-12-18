@@ -1,5 +1,6 @@
 import {
 	NoLocaleSet,
+	NoTranslationsSet,
 	UnknownDefaultLocale,
 	UnknownDefaultLocaleStrategy,
 	createTranslationsFactory,
@@ -15,6 +16,7 @@ it("exports `t`, `createTranslationsFactory`, and the errors", () => {
 	);
 
 	expect(indexImports.NoLocaleSet).toBe(NoLocaleSet);
+	expect(indexImports.NoTranslationsSet).toBe(NoTranslationsSet);
 	expect(indexImports.UnknownDefaultLocale).toBe(UnknownDefaultLocale);
 	expect(indexImports.UnknownDefaultLocaleStrategy).toBe(
 		UnknownDefaultLocaleStrategy,
