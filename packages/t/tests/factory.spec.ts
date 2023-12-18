@@ -17,12 +17,10 @@ const getMocks = () => {
 
 	return [
 		{
-			cache: new Map(),
 			getTranslationsHook: {
 				factory: vi.fn(() => useTranslations),
 				name: "useTranslations",
 			},
-			lazyLoaders: new Map(),
 			locale: {
 				getter: {
 					factory: vi.fn(() => useLocale),
@@ -31,6 +29,7 @@ const getMocks = () => {
 				negotiator: vi.fn((_: string[], fallback: string) => fallback),
 				setter: vi.fn(),
 			},
+			resources: { cache: new Map(), lazyLoaders: new Map() },
 		} satisfies CreateTranslationsFactoryOptions<
 			"useTranslations",
 			"useLocale"
@@ -48,17 +47,17 @@ it("creates a working `createTranslations` function", () => {
 
 	const translations = createTranslationsFactory(options)(loaders);
 
-	expect(options.lazyLoaders).toEqual(
+	expect(options.resources.lazyLoaders).toEqual(
 		new Map([
 			["en-GB", loaders["en-GB"]],
 			["en-US", loaders["en-US"]],
 		]),
 	);
-	expect(options.cache).toEqual(new Map());
+	expect(options.resources.cache).toEqual(new Map());
 	expect(options.locale.setter).not.toHaveBeenCalled();
 	expect(options.getTranslationsHook.factory).toHaveBeenCalledWith({
-		cache: options.cache,
-		lazyLoaders: options.lazyLoaders,
+		cache: options.resources.cache,
+		lazyLoaders: options.resources.lazyLoaders,
 	});
 	expect(translations).toEqual({
 		setLocale: options.locale.setter,

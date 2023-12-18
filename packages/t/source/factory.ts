@@ -119,14 +119,12 @@ export interface CreateTranslationsFactoryOptions<
 	GetTranslationsHookName extends string = "",
 	GetLocaleHookName extends string = "",
 > {
-	cache: Map<string, Awaited<ReturnType<LazyLoader>>>;
 	getTranslationsHook: {
 		factory: (
-			options: Pick<CreateTranslationsFactoryOptions, "cache" | "lazyLoaders">,
+			options: CreateTranslationsFactoryOptions["resources"],
 		) => GetTranslationsHook;
 		name: GetTranslationsHookName;
 	};
-	lazyLoaders: Map<string, LazyLoader>;
 	locale: {
 		getter: {
 			factory: () => GetLocaleHook;
@@ -135,21 +133,24 @@ export interface CreateTranslationsFactoryOptions<
 		negotiator: (availableLocales: string[], fallback: string) => string;
 		setter: SetLocale;
 	};
+	resources: {
+		cache: Map<string, Awaited<ReturnType<LazyLoader>>>;
+		lazyLoaders: Map<string, LazyLoader>;
+	};
 }
 
 export const createTranslationsFactory =
 	<GetTranslationsHookName extends string, GetLocaleHookName extends string>({
-		cache,
 		getTranslationsHook: {
 			factory: getTranslationsHookFactory,
 			name: getTranslationsHookName,
 		},
-		lazyLoaders,
 		locale: {
 			getter: { factory: getLocaleHookFactory, name: getLocaleHookName },
 			negotiator: localeNegotiator,
 			setter: setLocale,
 		},
+		resources: { cache, lazyLoaders },
 	}: CreateTranslationsFactoryOptions<
 		GetTranslationsHookName,
 		GetLocaleHookName
