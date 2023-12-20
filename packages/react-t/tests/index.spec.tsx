@@ -77,7 +77,7 @@ describe("throws", () => {
 	});
 });
 
-it("create a working `createTranslations`", async () => {
+it("creates a working `createTranslations`", async () => {
 	const { setLocale, t, useLocale, useTranslations } = createTranslations(
 		translations,
 		"en-GB",
