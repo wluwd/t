@@ -107,4 +107,11 @@ it("create a working `createTranslations`", async () => {
 		expect(translation.current.string).toBe(enUS.default.some.deep.string),
 	);
 
+	setLocale("en-GB");
+	rerenderLocale();
+	expect(locale.current).toBe("en-GB");
+
+	await waitFor(() =>
+		expect(t(translation.current.string)).toBe(enGB.default.some.deep.string),
+	);
 });
