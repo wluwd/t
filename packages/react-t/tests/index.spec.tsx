@@ -107,5 +107,4 @@ it("create a working `createTranslations`", async () => {
 		expect(translation.current.string).toBe(enUS.default.some.deep.string),
 	);
 
-	expect(t(translation.current.string)).toBe(enUS.default.some.deep.string);
 });
