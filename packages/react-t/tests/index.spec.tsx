@@ -115,3 +115,16 @@ it("create a working `createTranslations`", async () => {
 		expect(t(translation.current.string)).toBe(enGB.default.some.deep.string),
 	);
 });
+
+describe("`defaultLocale` strategies", () => {
+	it("`auto` picks up the correct locale", async () => {
+		// @info statically set by happy-dom, should never fail
+		expect(navigator.languages).toEqual(["en-US", "en"]);
+
+		const { useLocale } = createTranslations(translations, ["auto", "en-GB"]);
+
+		const { result: locale } = renderHook(() => useLocale());
+
+		expect(locale.current).toBe("en-US");
+	});
+});
