@@ -1,0 +1,29 @@
+name: ci
+
+on:
+  push:
+    branches: [trunk]
+  pull_request:
+    branches: [trunk]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20, 21]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: corepack enable
+      - run: echo node `node --version`, pnpm v`pnpm --version`
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --color --recursive run build
+      - run: pnpm --color --recursive run lint
+      - run: pnpm --color --recursive run typecheck
+      - run: pnpm --color run test
