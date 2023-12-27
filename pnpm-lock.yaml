@@ -82,7 +82,11 @@ importers:
         specifier: ^4.8.3
         version: 4.8.3
 
-  packages/t-utils: {}
+  packages/t-utils:
+    dependencies:
+      type-fest:
+        specifier: ^4.8.3
+        version: 4.8.3
 
 packages:
 

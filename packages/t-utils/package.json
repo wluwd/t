@@ -12,6 +12,10 @@
     "./negotiator": {
       "types": "./dist/negotiator.d.ts",
       "import": "./dist/negotiator.js"
+    },
+    "./translator": {
+      "types": "./dist/translator.d.ts",
+      "import": "./dist/translator.js"
     }
   },
   "scripts": {
@@ -19,5 +23,8 @@
     "prelint": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "tsc"
+  },
+  "dependencies": {
+    "type-fest": "^4.8.3"
   }
 }
