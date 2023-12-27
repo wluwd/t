@@ -56,9 +56,6 @@ importers:
 
   packages/t-react:
     dependencies:
-      '@fluent/langneg':
-        specifier: ^0.7.0
-        version: 0.7.0
       '@wluwd/t':
         specifier: workspace:*
         version: link:../t
