@@ -247,10 +247,10 @@ type WithLazyInit<
 export const createTranslationsFactory =
 	<
 		SignalLike extends boolean,
-		GetLocaleHookName extends string,
-		GetTranslationsHookName extends string,
-		GetLocaleFunctionName extends string | undefined = undefined,
-		GetTranslationsFunctionName extends string | undefined = undefined,
+		LocaleGetterHookName extends string,
+		TranslationsGetterHookName extends string,
+		LocaleGetterFunctionName extends string | undefined = undefined,
+		TranslationsGetterFunctionName extends string | undefined = undefined,
 	>({
 		locale: {
 			fn: localeFn,
@@ -264,10 +264,10 @@ export const createTranslationsFactory =
 		},
 	}: CreateTranslationsFactoryOptions<
 		SignalLike,
-		GetLocaleFunctionName,
-		GetLocaleHookName,
-		GetTranslationsFunctionName,
-		GetTranslationsHookName
+		LocaleGetterFunctionName,
+		LocaleGetterHookName,
+		TranslationsGetterFunctionName,
+		TranslationsGetterHookName
 	>) =>
 	<
 		Loaders extends Record<string, LazyLoader>,
@@ -278,8 +278,8 @@ export const createTranslationsFactory =
 	>(
 		translationLoaders: Loaders,
 		{
-			cache: userCache,
-			localeFrom,
+			cache: initialCache,
+			localeFrom: negotiators,
 			translator,
 		}: {
 			cache?: Partial<Record<Locale, Translations>>;
@@ -296,28 +296,28 @@ export const createTranslationsFactory =
 				Translations,
 				{
 					locale: {
-						function: GetLocaleFunctionName extends undefined
+						function: LocaleGetterFunctionName extends undefined
 							? undefined
 							: {
 									fn: LocaleGetter<Locale, false>;
-									name: GetLocaleFunctionName;
+									name: LocaleGetterFunctionName;
 								};
 						hook: {
 							fn: LocaleGetter<Locale, SignalLike>;
-							name: GetLocaleHookName;
+							name: LocaleGetterHookName;
 						};
 						setter: LocaleSetter<Locale>;
 					};
 					translations: {
-						function: GetTranslationsFunctionName extends undefined
+						function: TranslationsGetterFunctionName extends undefined
 							? undefined
 							: {
 									fn: TranslationsPicker<Translations, false>;
-									name: GetTranslationsFunctionName;
+									name: TranslationsGetterFunctionName;
 								};
 						hook: {
 							fn: TranslationsPicker<Translations, SignalLike>;
-							name: GetTranslationsHookName;
+							name: TranslationsGetterHookName;
 						};
 					};
 					translator: Translator;
@@ -333,8 +333,8 @@ export const createTranslationsFactory =
 				loaders.set(locale, loader);
 			}
 
-			if (userCache) {
-				for (const [locale, translations] of Object.entries(userCache) as [
+			if (initialCache) {
+				for (const [locale, translations] of Object.entries(initialCache) as [
 					Locale,
 					Translations,
 				][]) {
@@ -344,38 +344,38 @@ export const createTranslationsFactory =
 
 			const availableLocales = Object.keys(translationLoaders) as Locale[];
 
-			const negotiators =
-				initNegotiators !== undefined ? initNegotiators : localeFrom;
+			const activeNegotiators =
+				initNegotiators !== undefined ? initNegotiators : negotiators;
 
-			for (const localeGetter of negotiators) {
-				if (localeGetter === false) {
+			for (const negotiator of activeNegotiators) {
+				if (negotiator === false) {
 					continue;
 				}
 
-				const locale =
-					typeof localeGetter === "string"
-						? localeGetter
-						: localeGetter(availableLocales);
+				const negotiatedLocale =
+					typeof negotiator === "string"
+						? negotiator
+						: negotiator(availableLocales);
 
-				if (locale !== undefined) {
-					if (isKeyof(translationLoaders, locale)) {
-						localeSetter(locale);
+				if (negotiatedLocale !== undefined) {
+					if (isKeyof(translationLoaders, negotiatedLocale)) {
+						localeSetter(negotiatedLocale);
 
 						return;
 					} else {
 						throw new UnknownLocale({
 							availableLocales: Object.keys(translationLoaders),
-							desiredLocale: locale,
-							negotiator: localeGetter,
+							desiredLocale: negotiatedLocale,
+							negotiator,
 						});
 					}
 				}
 			}
 
-			if (negotiators.length !== 0) {
+			if (activeNegotiators.length !== 0) {
 				throw new NoLocaleFound({
 					availableLocales: Object.keys(translationLoaders),
-					negotiators,
+					negotiators: activeNegotiators,
 				});
 			}
 		};
