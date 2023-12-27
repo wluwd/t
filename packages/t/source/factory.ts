@@ -76,7 +76,7 @@ export interface CreateTranslationsFactoryOptions<
 					string,
 					string
 				>["resources"],
-			) => TranslationsPicker<AnyTranslations, false>,
+			) => TranslationsPickerAsync<AnyTranslations>,
 			TranslationsGetterFunctionName
 		>;
 		hook: Factory<
@@ -110,6 +110,12 @@ type TranslationsPicker<
 	? () => Get<Translations, Prefix>
 	: Get<Translations, Prefix>;
 
+type TranslationsPickerAsync<Translations extends AnyTranslations> = <
+	Prefix extends PathsToBranches<Translations>,
+>(
+	prefix: Prefix,
+) => Promise<Get<Translations, Prefix>>;
+
 type LocaleGetterHookBuilder<
 	Options extends Fn<LocaleGetter<string, boolean>, string>,
 > = {
@@ -132,7 +138,7 @@ type TranslationsGetterHookBuilder<
 
 type TranslationsGetterFunctionBuilder<
 	Options extends
-		| Fn<TranslationsPicker<AnyTranslations, false>, string>
+		| Fn<TranslationsPickerAsync<AnyTranslations>, string>
 		| undefined,
 > = Options extends object
 	? {
@@ -150,7 +156,7 @@ type CreateTranslationsInstance<
 			setter: LocaleSetter<Locale>;
 		};
 		translations: {
-			function?: Fn<TranslationsPicker<Translations, false>, string>;
+			function?: Fn<TranslationsPickerAsync<Translations>, string>;
 			hook: Fn<TranslationsPicker<Translations, boolean>, string>;
 		};
 		translator: AnyTranslator;
@@ -241,7 +247,7 @@ export const createTranslationsFactory =
 						function: TranslationsGetterFunctionName extends undefined
 							? undefined
 							: {
-									fn: TranslationsPicker<Translations, false>;
+									fn: TranslationsPickerAsync<Translations>;
 									name: TranslationsGetterFunctionName;
 								};
 						hook: {
