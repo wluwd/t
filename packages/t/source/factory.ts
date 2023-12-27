@@ -1,29 +1,18 @@
-import { t } from "~/translator.ts";
 import { isKeyof } from "~/utils.ts";
 
-import type { Translator } from "~/translator.ts";
 import type { Get, Simplify, ValueOf } from "type-fest";
 
-export class UnknownDefaultLocaleStrategy extends Error {
+export class NoLocaleFound extends Error {
 	details: {
-		availableLocales: Array<string>;
-		availableStrategies: Array<string>;
-		desiredFallback: string;
-		desiredStrategy: string;
+		availableLocales: readonly string[];
+		negotiators: LocaleNegotiators<any>;
 	};
 
-	constructor(
-		details: UnknownDefaultLocaleStrategy["details"],
-		options?: ErrorOptions,
-	) {
+	constructor(details: NoLocaleFound["details"], options?: ErrorOptions) {
 		super(
-			`Tried to use an unknown \`defaultLocale\` strategy (\`[${
-				details.desiredStrategy
-			}, ${
-				details.desiredFallback
-			}]\`).\n\nAvailable strategies: \`[${details.availableStrategies.join(
-				" | ",
-			)}, ${details.availableLocales.join(" | ")}]\`.`,
+			`All negotiators failed to find a fitting \`locale\`, this error should never happen.\n\nNegotiators: \`[${details.negotiators.join(
+				", ",
+			)}]\`.\n\nAvailable locales: ${details.availableLocales.join(", ")}.`,
 			options,
 		);
 
@@ -31,18 +20,16 @@ export class UnknownDefaultLocaleStrategy extends Error {
 	}
 }
 
-export class UnknownDefaultLocale extends Error {
+export class UnknownLocale extends Error {
 	details: {
-		availableLocales: Array<string>;
+		availableLocales: readonly string[];
 		desiredLocale: string;
+		negotiator: LocaleNegotiators<any>[number];
 	};
 
-	constructor(
-		details: UnknownDefaultLocale["details"],
-		options?: ErrorOptions,
-	) {
+	constructor(details: UnknownLocale["details"], options?: ErrorOptions) {
 		super(
-			`Tried to set an unknown \`defaultLocale\` (${
+			`A negotiator returned an unknown \`locale\` (${
 				details.desiredLocale
 			}).\n\nAvailable locales: ${details.availableLocales.join(", ")}.`,
 			options,
@@ -63,8 +50,8 @@ export class NoLocaleSet extends Error {
 
 export class NoTranslationsSet extends Error {
 	details: {
-		availableLocales: Array<number | string>;
-		desiredLocale: number | string;
+		availableLocales: readonly string[];
+		desiredLocale: string;
 	};
 
 	constructor(details: NoTranslationsSet["details"], options?: ErrorOptions) {
@@ -100,118 +87,321 @@ type PathsToBranches<
 > &
 	string;
 
-export type LazyLoader = () => Promise<Record<string, unknown>>;
+type AnyFunction = (...args: any) => any;
 
-export type GetTranslationsHook<
-	Translations extends Record<string, unknown> = Record<string, unknown>,
-> = <Prefix extends PathsToBranches<Translations>>(
-	prefix: Prefix,
-) => Get<Translations, Prefix>;
+interface Factory<
+	Fn extends AnyFunction = AnyFunction,
+	Name extends string | undefined = string,
+> {
+	factory: Fn;
+	name: Name;
+}
 
-export type SetLocale<AllowedLocales extends string = string> = (
+interface Fn<
+	Fn extends AnyFunction = AnyFunction,
+	Name extends string | undefined = string,
+> {
+	fn: Fn;
+	name: Name;
+}
+
+type AnyTranslations = Record<string, unknown>;
+type LazyLoader<Return = AnyTranslations> = () => Promise<Return>;
+
+export type LocaleNegotiator<Locale> = (
+	availableLocales: readonly Locale[],
+) => Locale | undefined;
+
+type LocaleNegotiators<Locale> =
+	| readonly [...(LocaleNegotiator<Locale> | false)[], Locale]
+	| readonly [];
+
+type LocaleSetter<AllowedLocales extends string = string> = (
 	locale: AllowedLocales,
 ) => void;
 
-export type GetLocaleHook<AllowedLocales extends string = string> =
-	() => AllowedLocales;
-
 export interface CreateTranslationsFactoryOptions<
-	GetTranslationsHookName extends string = "",
-	GetLocaleHookName extends string = "",
+	SignalLike extends boolean,
+	LocaleGetterFunctionName extends string | undefined,
+	LocaleGetterHookName extends string,
+	TranslationsGetterFunctionName extends string | undefined,
+	TranslationsGetterHookName extends string,
 > {
-	getTranslationsHook: {
-		factory: (
-			options: CreateTranslationsFactoryOptions["resources"],
-		) => GetTranslationsHook;
-		name: GetTranslationsHookName;
-	};
+	hasSignalLikeInterface: SignalLike;
 	locale: {
-		getter: {
-			factory: () => GetLocaleHook;
-			name: GetLocaleHookName;
-		};
-		negotiator: (availableLocales: string[], fallback: string) => string;
-		setter: SetLocale;
+		fn?: Factory<() => LocaleGetter<string, false>, LocaleGetterFunctionName>;
+		hook: Factory<() => LocaleGetter<string, SignalLike>, LocaleGetterHookName>;
+		setter: LocaleSetter<string>;
 	};
 	resources: {
-		cache: Map<string, Awaited<ReturnType<LazyLoader>>>;
-		lazyLoaders: Map<string, LazyLoader>;
+		cache: Map<string, AnyTranslations>;
+		loaders: Map<string, LazyLoader>;
+	};
+	translations: {
+		fn?: Factory<
+			(
+				resources: CreateTranslationsFactoryOptions<
+					SignalLike,
+					string,
+					string,
+					string,
+					string
+				>["resources"],
+			) => TranslationsPicker<AnyTranslations, false>,
+			TranslationsGetterFunctionName
+		>;
+		hook: Factory<
+			(
+				resources: CreateTranslationsFactoryOptions<
+					SignalLike,
+					string,
+					string,
+					string,
+					string
+				>["resources"],
+			) => TranslationsPicker<AnyTranslations, SignalLike>,
+			TranslationsGetterHookName
+		>;
 	};
 }
 
-export const createTranslationsFactory =
-	<GetTranslationsHookName extends string, GetLocaleHookName extends string>({
-		getTranslationsHook: {
-			factory: getTranslationsHookFactory,
-			name: getTranslationsHookName,
-		},
+type AnyTranslator = (translation: string, data: any) => string;
+
+type LocaleGetter<
+	Locale extends string,
+	SignalLike extends boolean,
+> = () => SignalLike extends true ? () => Locale : Locale;
+
+type TranslationsPicker<
+	Translations extends AnyTranslations,
+	SignalLike extends boolean,
+> = <Prefix extends PathsToBranches<Translations>>(
+	prefix: Prefix,
+) => SignalLike extends true
+	? () => Get<Translations, Prefix>
+	: Get<Translations, Prefix>;
+
+type LocaleGetterHookBuilder<
+	Options extends Fn<LocaleGetter<string, boolean>, string>,
+> = {
+	[key in Options["name"]]: Options["fn"];
+};
+
+type LocaleGetterFunctionBuilder<
+	Options extends Fn<LocaleGetter<string, false>, string> | undefined,
+> = Options extends object
+	? {
+			[key in Options["name"]]: Options["fn"];
+		}
+	: object;
+
+type TranslationsGetterHookBuilder<
+	Options extends Fn<TranslationsPicker<AnyTranslations, boolean>, string>,
+> = {
+	[key in Options["name"]]: Options["fn"];
+};
+
+type TranslationsGetterFunctionBuilder<
+	Options extends
+		| Fn<TranslationsPicker<AnyTranslations, false>, string>
+		| undefined,
+> = Options extends object
+	? {
+			[key in Options["name"]]: Options["fn"];
+		}
+	: object;
+
+type CreateTranslationsInstance<
+	Locale extends string,
+	Translations extends AnyTranslations,
+	Options extends {
 		locale: {
-			getter: { factory: getLocaleHookFactory, name: getLocaleHookName },
-			negotiator: localeNegotiator,
-			setter: setLocale,
+			function?: Fn<LocaleGetter<Locale, false>, string>;
+			hook: Fn<LocaleGetter<Locale, boolean>, string>;
+			setter: LocaleSetter<Locale>;
+		};
+		translations: {
+			function?: Fn<TranslationsPicker<Translations, false>, string>;
+			hook: Fn<TranslationsPicker<Translations, boolean>, string>;
+		};
+		translator: AnyTranslator;
+	},
+> = LocaleGetterHookBuilder<Options["locale"]["hook"]> &
+	LocaleGetterFunctionBuilder<Options["locale"]["function"]> &
+	TranslationsGetterHookBuilder<Options["translations"]["hook"]> &
+	TranslationsGetterFunctionBuilder<Options["translations"]["function"]> & {
+		setLocale: Options["locale"]["setter"];
+		t: Options["translator"];
+	};
+
+type WithLazyInit<
+	Lazy extends boolean,
+	Locale extends string,
+	Input extends object,
+> = Lazy extends true
+	? {
+			initTranslator: (locale?: Locale) => void;
+		} & Input
+	: Input;
+
+export const createTranslationsFactory =
+	<
+		SignalLike extends boolean,
+		GetLocaleHookName extends string,
+		GetTranslationsHookName extends string,
+		GetLocaleFunctionName extends string | undefined = undefined,
+		GetTranslationsFunctionName extends string | undefined = undefined,
+	>({
+		locale: {
+			fn: localeFn,
+			hook: { factory: localeHookFactory, name: localeHookName },
+			setter: localeSetter,
 		},
-		resources: { cache, lazyLoaders },
+		resources: { cache: globalCache, loaders },
+		translations: {
+			fn: translationsFn,
+			hook: { factory: translationsHookFactory, name: translationsHookName },
+		},
 	}: CreateTranslationsFactoryOptions<
-		GetTranslationsHookName,
-		GetLocaleHookName
+		SignalLike,
+		GetLocaleFunctionName,
+		GetLocaleHookName,
+		GetTranslationsFunctionName,
+		GetTranslationsHookName
 	>) =>
 	<
-		Translations extends Record<string, LazyLoader>,
-		AllowedLocales extends keyof Translations & string,
-		DefaultLocale extends
-			| [strategy: "auto", fallback: AllowedLocales]
-			| AllowedLocales,
+		Loaders extends Record<string, LazyLoader>,
+		Locale extends keyof Loaders & string,
+		Translations extends Awaited<ReturnType<ValueOf<Loaders>>>,
+		Translator extends AnyTranslator,
+		Lazy extends boolean = false,
 	>(
-		translations: Translations,
-		defaultLocale?: DefaultLocale,
-	): Simplify<
+		translationLoaders: Loaders,
 		{
-			[k in GetTranslationsHookName]: GetTranslationsHook<
-				Awaited<ReturnType<ValueOf<Translations>>>
-			>;
-		} & {
-			[k in GetLocaleHookName]: GetLocaleHook<AllowedLocales>;
-		} & {
-			setLocale: SetLocale<AllowedLocales>;
-			t: Translator;
-		}
-	> => {
-		for (const [locale, lazyLoader] of Object.entries(translations)) {
-			lazyLoaders.set(locale, lazyLoader);
-		}
-
-		if (defaultLocale !== undefined) {
-			if (Array.isArray(defaultLocale)) {
-				const [strategy, fallback] = defaultLocale;
-
-				if (strategy === "auto" && isKeyof(translations, fallback)) {
-					setLocale(localeNegotiator(Object.keys(translations), fallback));
-				} else {
-					throw new UnknownDefaultLocaleStrategy({
-						availableLocales: Object.keys(translations),
-						availableStrategies: ["auto"],
-						desiredFallback: fallback,
-						desiredStrategy: strategy,
-					});
+			cache: userCache,
+			localeFrom,
+			translator,
+		}: {
+			cache?: Partial<Record<Locale, Translations>>;
+			localeFrom: LocaleNegotiators<Locale>;
+			translator: Translator;
+		},
+		lazy?: Lazy,
+	): Simplify<
+		WithLazyInit<
+			Lazy,
+			Locale,
+			CreateTranslationsInstance<
+				Locale,
+				Translations,
+				{
+					locale: {
+						function: GetLocaleFunctionName extends undefined
+							? undefined
+							: {
+									fn: LocaleGetter<Locale, false>;
+									name: GetLocaleFunctionName;
+								};
+						hook: {
+							fn: LocaleGetter<Locale, SignalLike>;
+							name: GetLocaleHookName;
+						};
+						setter: LocaleSetter<Locale>;
+					};
+					translations: {
+						function: GetTranslationsFunctionName extends undefined
+							? undefined
+							: {
+									fn: TranslationsPicker<Translations, false>;
+									name: GetTranslationsFunctionName;
+								};
+						hook: {
+							fn: TranslationsPicker<Translations, SignalLike>;
+							name: GetTranslationsHookName;
+						};
+					};
+					translator: Translator;
 				}
-			} else if (isKeyof(translations, defaultLocale)) {
-				setLocale(defaultLocale);
-			} else {
-				throw new UnknownDefaultLocale({
-					availableLocales: Object.keys(translations),
-					desiredLocale: defaultLocale,
+			>
+		>
+	> => {
+		const initTranslator = (locale?: Locale) => {
+			for (const [locale, loader] of Object.entries(translationLoaders) as [
+				Locale,
+				LazyLoader,
+			][]) {
+				loaders.set(locale, loader);
+			}
+
+			if (userCache) {
+				for (const [locale, translations] of Object.entries(userCache) as [
+					Locale,
+					Translations,
+				][]) {
+					globalCache.set(locale, translations);
+				}
+			}
+
+			const availableLocales = Object.keys(translationLoaders) as Locale[];
+
+			const negotiators =
+				locale !== undefined ? ([locale] as const) : localeFrom;
+
+			for (const localeGetter of negotiators) {
+				if (localeGetter === false) {
+					continue;
+				}
+
+				const locale =
+					typeof localeGetter === "string"
+						? localeGetter
+						: localeGetter(availableLocales);
+
+				if (locale !== undefined) {
+					if (isKeyof(translationLoaders, locale)) {
+						localeSetter(locale);
+
+						return;
+					} else {
+						throw new UnknownLocale({
+							availableLocales: Object.keys(translationLoaders),
+							desiredLocale: locale,
+							negotiator: localeGetter,
+						});
+					}
+				}
+			}
+
+			if (negotiators.length !== 0) {
+				throw new NoLocaleFound({
+					availableLocales: Object.keys(translationLoaders),
+					negotiators,
 				});
 			}
+		};
+
+		if (lazy !== true) {
+			initTranslator();
 		}
 
 		// eslint-disable-next-line ts/no-unsafe-return
 		return <any>{
-			[getLocaleHookName]: getLocaleHookFactory(),
-			[getTranslationsHookName]: getTranslationsHookFactory({
-				cache,
-				lazyLoaders,
+			...(lazy && {
+				initTranslator,
 			}),
-			setLocale,
-			t,
+			[localeHookName]: localeHookFactory(),
+			...(localeFn?.name && { [localeFn.name]: localeFn.factory() }),
+			setLocale: localeSetter,
+			[translationsHookName]: translationsHookFactory({
+				cache: globalCache,
+				loaders,
+			}),
+			...(translationsFn?.name && {
+				[translationsFn.name]: translationsFn.factory({
+					cache: globalCache,
+					loaders,
+				}),
+			}),
+			t: translator,
 		};
 	};

@@ -1,8 +1,4 @@
-import {
-	UnknownDefaultLocale,
-	UnknownDefaultLocaleStrategy,
-	createTranslationsFactory,
-} from "~/factory.ts";
+import { UnknownLocale, createTranslationsFactory } from "~/factory.ts";
 import { t } from "~/translator.ts";
 import { describe, expect, it, vi } from "vitest";
 
@@ -17,50 +13,59 @@ const getMocks = () => {
 
 	return [
 		{
-			getTranslationsHook: {
-				factory: vi.fn(() => useTranslations),
-				name: "useTranslations",
-			},
+			hasSignalLikeInterface: false,
 			locale: {
-				getter: {
+				hook: {
 					factory: vi.fn(() => useLocale),
 					name: "useLocale",
 				},
-				negotiator: vi.fn((_: string[], fallback: string) => fallback),
 				setter: vi.fn(),
 			},
-			resources: { cache: new Map(), lazyLoaders: new Map() },
+			resources: { cache: new Map(), loaders: new Map() },
+			translations: {
+				hook: {
+					factory: vi.fn(() => useTranslations),
+					name: "useTranslations",
+				},
+			},
 		} satisfies CreateTranslationsFactoryOptions<
-			"useTranslations",
-			"useLocale"
+			false,
+			undefined,
+			"useLocale",
+			undefined,
+			"useTranslations"
 		>,
 		{ useLocale, useTranslations },
 		{
 			"en-GB": () => Promise.resolve(enGB),
 			"en-US": () => Promise.resolve(enUS),
 		},
+		{ localeFrom: [], translator: t },
 	] as const;
 };
 
 it("creates a working `createTranslations` function", () => {
-	const [options, hooks, loaders] = getMocks();
+	const [factoryOptions, hooks, loaders, instanceOptions] = getMocks();
 
-	const translations = createTranslationsFactory(options)(loaders);
+	const translations = createTranslationsFactory(factoryOptions)(
+		loaders,
+		instanceOptions,
+	);
 
-	expect(options.resources.lazyLoaders).toEqual(
+	expect(factoryOptions.resources.loaders).toEqual(
 		new Map([
 			["en-GB", loaders["en-GB"]],
 			["en-US", loaders["en-US"]],
 		]),
 	);
-	expect(options.resources.cache).toEqual(new Map());
-	expect(options.locale.setter).not.toHaveBeenCalled();
-	expect(options.getTranslationsHook.factory).toHaveBeenCalledWith({
-		cache: options.resources.cache,
-		lazyLoaders: options.resources.lazyLoaders,
+	expect(factoryOptions.resources.cache).toEqual(new Map());
+	expect(factoryOptions.locale.setter).not.toHaveBeenCalled();
+	expect(factoryOptions.translations.hook.factory).toHaveBeenCalledWith({
+		cache: factoryOptions.resources.cache,
+		loaders: factoryOptions.resources.loaders,
 	});
 	expect(translations).toEqual({
-		setLocale: options.locale.setter,
+		setLocale: factoryOptions.locale.setter,
 		t,
 		useLocale: hooks.useLocale,
 		useTranslations: hooks.useTranslations,
@@ -71,22 +76,12 @@ describe("`defaultLocale`", () => {
 	it("calls `locale.setter` when it's a string", () => {
 		const [options, _, loaders] = getMocks();
 
-		createTranslationsFactory(options)(loaders, "en-GB");
+		createTranslationsFactory(options)(loaders, {
+			localeFrom: ["en-GB"],
+			translator: t,
+		});
 
 		expect(options.locale.setter).toHaveBeenCalledWith("en-GB");
-	});
-
-	it("calls `negotiator` when it's an array", () => {
-		const [options, _, loaders] = getMocks();
-
-		createTranslationsFactory(options)(loaders, ["auto", "en-US"]);
-
-		expect(options.locale.negotiator).toHaveBeenCalledWith(
-			["en-GB", "en-US"],
-			"en-US",
-		);
-		expect(options.locale.negotiator).toHaveReturnedWith("en-US");
-		expect(options.locale.setter).toHaveBeenCalledWith("en-US");
 	});
 
 	it("throws `UnknownDefaultLocale` when using an unknown locale", () => {
@@ -94,39 +89,15 @@ describe("`defaultLocale`", () => {
 
 		try {
 			// @ts-expect-error unknown locale
-			createTranslationsFactory(options)(loaders, "it-IT");
+			createTranslationsFactory(options)(loaders, { localeFrom: ["it-IT"] });
 			expect.unreachable();
 		} catch (error) {
-			expect(error).toBeInstanceOf(UnknownDefaultLocale);
-			expect((error as UnknownDefaultLocale).details).toEqual({
+			expect(error).toBeInstanceOf(UnknownLocale);
+			expect((error as UnknownLocale).details).toEqual({
 				availableLocales: ["en-GB", "en-US"],
 				desiredLocale: "it-IT",
+				negotiator: "it-IT",
 			});
 		}
-	});
-
-	it("throws `UnknownDefaultLocaleStrategy` when using an unknown strategy", () => {
-		const [options, _, loaders] = getMocks();
-
-		const createTranslations = createTranslationsFactory(options);
-
-		try {
-			// @ts-expect-error locale not provided
-			createTranslations(loaders, ["auto", "it-IT"]);
-			expect.unreachable();
-		} catch (error) {
-			expect(error).toBeInstanceOf(UnknownDefaultLocaleStrategy);
-			expect((error as UnknownDefaultLocaleStrategy).details).toEqual({
-				availableLocales: ["en-GB", "en-US"],
-				availableStrategies: ["auto"],
-				desiredFallback: "it-IT",
-				desiredStrategy: "auto",
-			});
-		}
-
-		// @ts-expect-error locale not provided
-		expect(() => createTranslations(loaders, ["unknown", "en-US"])).toThrow(
-			UnknownDefaultLocaleStrategy,
-		);
 	});
 });

@@ -1,8 +1,8 @@
 import {
+	NoLocaleFound,
 	NoLocaleSet,
 	NoTranslationsSet,
-	UnknownDefaultLocale,
-	UnknownDefaultLocaleStrategy,
+	UnknownLocale,
 	createTranslationsFactory,
 } from "~/factory.ts";
 import * as indexImports from "~/index.ts";
@@ -20,8 +20,6 @@ it("exports `t`, `createTranslationsFactory`, `lazyTranslations`, and the errors
 
 	expect(indexImports.NoLocaleSet).toBe(NoLocaleSet);
 	expect(indexImports.NoTranslationsSet).toBe(NoTranslationsSet);
-	expect(indexImports.UnknownDefaultLocale).toBe(UnknownDefaultLocale);
-	expect(indexImports.UnknownDefaultLocaleStrategy).toBe(
-		UnknownDefaultLocaleStrategy,
-	);
+	expect(indexImports.NoLocaleFound).toBe(NoLocaleFound);
+	expect(indexImports.UnknownLocale).toBe(UnknownLocale);
 });
