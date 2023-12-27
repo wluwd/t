@@ -45,7 +45,16 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4(@types/node@20.10.4)(happy-dom@12.10.3)
 
-  packages/react-t:
+  packages/t:
+    dependencies:
+      '@wluwd/t-utils':
+        specifier: workspace:*
+        version: link:../t-utils
+      type-fest:
+        specifier: ^4.8.3
+        version: 4.8.3
+
+  packages/t-react:
     dependencies:
       '@fluent/langneg':
         specifier: ^0.7.0
@@ -72,15 +81,6 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
-
-  packages/t:
-    dependencies:
-      '@wluwd/t-utils':
-        specifier: workspace:*
-        version: link:../t-utils
-      type-fest:
-        specifier: ^4.8.3
-        version: 4.8.3
 
   packages/t-utils:
     dependencies:
