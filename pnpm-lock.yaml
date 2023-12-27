@@ -84,6 +84,9 @@ importers:
 
   packages/t-utils:
     dependencies:
+      '@fluent/langneg':
+        specifier: ^0.7.0
+        version: 0.7.0
       type-fest:
         specifier: ^4.8.3
         version: 4.8.3
