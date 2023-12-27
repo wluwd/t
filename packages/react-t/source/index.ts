@@ -69,5 +69,3 @@ export const createTranslations = createTranslationsFactory({
 		},
 	},
 });
-
-export { lazyTranslations } from "@wluwd/t";

@@ -1,4 +1,4 @@
-import { lazyTranslations } from "~/lazy-loader.ts";
+import { lazyTranslations } from "~/lazy-translations.ts";
 import { expect, it } from "vitest";
 
 const fakeDefaultImport = {

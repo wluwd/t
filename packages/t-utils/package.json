@@ -9,6 +9,10 @@
       "types": "./dist/error.d.ts",
       "import": "./dist/error.js"
     },
+    "./lazy-translations": {
+      "types": "./dist/lazy-translations.d.ts",
+      "import": "./dist/lazy-translations.js"
+    },
     "./negotiator": {
       "types": "./dist/negotiator.d.ts",
       "import": "./dist/negotiator.js"
