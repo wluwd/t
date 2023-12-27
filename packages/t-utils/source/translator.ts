@@ -19,7 +19,7 @@ export type Translator = <
 	...[data]: [Data] extends [never] ? [data?: undefined] : [data: Data]
 ) => string;
 
-export const t: Translator = (translation, ...[data]) =>
+export const translator: Translator = (translation, ...[data]) =>
 	translation?.replace(
 		/{{(\w+)}}/g,
 		(_rawMatch, property: string) =>

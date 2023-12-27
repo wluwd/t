@@ -1,4 +1,4 @@
-import { UnknownLocale, t } from "@wluwd/t-utils";
+import { UnknownLocale, translator } from "@wluwd/t-utils";
 import { createTranslationsFactory } from "~/factory.ts";
 import { describe, expect, it, vi } from "vitest";
 
@@ -40,7 +40,7 @@ const getMocks = () => {
 			"en-GB": () => Promise.resolve(enGB),
 			"en-US": () => Promise.resolve(enUS),
 		},
-		{ localeFrom: [], translator: t },
+		{ localeFrom: [], translator },
 	] as const;
 };
 
@@ -66,7 +66,7 @@ it("creates a working `createTranslations` function", () => {
 	});
 	expect(translations).toEqual({
 		setLocale: factoryOptions.locale.setter,
-		t,
+		t: translator,
 		useLocale: hooks.useLocale,
 		useTranslations: hooks.useTranslations,
 	});
@@ -78,7 +78,7 @@ describe("`defaultLocale`", () => {
 
 		createTranslationsFactory(options)(loaders, {
 			localeFrom: ["en-GB"],
-			translator: t,
+			translator,
 		});
 
 		expect(options.locale.setter).toHaveBeenCalledWith("en-GB");

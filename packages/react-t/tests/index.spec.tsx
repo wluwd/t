@@ -3,7 +3,7 @@ import {
 	NoLocaleSet,
 	NoTranslationsSet,
 	lazyTranslations,
-	t as translator,
+	translator,
 } from "@wluwd/t-utils";
 import { createTranslations } from "~/index.ts";
 import { Component } from "react";
