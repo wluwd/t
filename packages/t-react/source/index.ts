@@ -4,12 +4,57 @@ import delve from "dlv";
 import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { useMemo } from "react";
 
+import type { CreateTranslationsFactoryOptions } from "@wluwd/t";
+
 const $locale = atom<string | undefined>(undefined);
 const defaultStore = getDefaultStore();
+
+const loadAndCacheTranslations = async (
+	locale: string | undefined,
+	{
+		cache,
+		loaders,
+	}: CreateTranslationsFactoryOptions<
+		boolean,
+		string,
+		string,
+		string,
+		string
+	>["resources"],
+) => {
+	if (locale === undefined) {
+		throw new NoLocaleSet();
+	}
+
+	let translations = cache.get(locale);
+
+	if (translations !== undefined) {
+		return translations;
+	}
+
+	const loader = loaders.get(locale);
+
+	if (loader === undefined) {
+		throw new NoTranslationsSet({
+			availableLocales: Array.from(loaders.keys()),
+			desiredLocale: locale,
+		});
+	}
+
+	translations = await loader();
+
+	cache.set(locale, translations);
+
+	return translations;
+};
 
 export const createTranslations = createTranslationsFactory({
 	hasSignalLikeInterface: false,
 	locale: {
+		fn: {
+			factory: () => () => defaultStore.get($locale)!,
+			name: "getLocale",
+		},
 		hook: {
 			factory: () => () => useAtomValue($locale)!,
 			name: "useLocale",
@@ -23,35 +68,21 @@ export const createTranslations = createTranslationsFactory({
 		loaders: new Map(),
 	},
 	translations: {
+		fn: {
+			factory: (resources) => async (prefix) => {
+				const locale = defaultStore.get($locale);
+
+				// eslint-disable-next-line ts/no-unsafe-return
+				return delve(await loadAndCacheTranslations(locale, resources), prefix);
+			},
+			name: "getTranslations",
+		},
 		hook: {
-			factory: ({ cache, loaders }) => {
-				const $translations = atom(async (get) => {
+			factory: (resources) => {
+				const $translations = atom((get) => {
 					const locale = get($locale);
 
-					if (locale === undefined) {
-						throw new NoLocaleSet();
-					}
-
-					let translations = cache.get(locale);
-
-					if (translations !== undefined) {
-						return translations;
-					}
-
-					const loader = loaders.get(locale);
-
-					if (loader === undefined) {
-						throw new NoTranslationsSet({
-							availableLocales: Array.from(loaders.keys()),
-							desiredLocale: locale,
-						});
-					}
-
-					translations = await loader();
-
-					cache.set(locale, translations);
-
-					return translations;
+					return loadAndCacheTranslations(locale, resources);
 				});
 
 				return (prefix) => {

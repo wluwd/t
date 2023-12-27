@@ -11,8 +11,6 @@ import { describe, expect, it } from "vitest";
 
 import type { ReactNode } from "react";
 
-const nextTick = () => Promise.resolve();
-
 const enGB = { default: { some: { deep: { string: "en-GB" } } } } as const;
 const enUS = { default: { some: { deep: { string: "en-US" } } } } as const;
 
@@ -45,16 +43,14 @@ describe("throws", () => {
 		expect(locale.current).toBe(undefined);
 
 		const error = { current: undefined };
-		const { rerender } = renderHook(() => useTranslations("some.deep"), {
+
+		renderHook(() => useTranslations("some.deep"), {
 			wrapper: ({ children }) => (
 				<ErrorBoundary error={error}>{children}</ErrorBoundary>
 			),
 		});
 
-		await nextTick();
-		rerender();
-
-		expect(error.current).toBeInstanceOf(NoLocaleSet);
+		await waitFor(() => expect(error.current).toBeInstanceOf(NoLocaleSet));
 	});
 
 	it("`NoTranslationsSet` when trying to load translations that have no loader", async () => {
@@ -67,7 +63,8 @@ describe("throws", () => {
 		expect(locale.current).toBe(undefined);
 
 		const error = { current: undefined };
-		const { rerender } = renderHook(() => useTranslations("some.deep"), {
+
+		renderHook(() => useTranslations("some.deep"), {
 			wrapper: ({ children }) => (
 				<ErrorBoundary error={error}>{children}</ErrorBoundary>
 			),
@@ -76,14 +73,13 @@ describe("throws", () => {
 		// @ts-expect-error testing undefined translations
 		setLocale("en-AU");
 
-		await nextTick();
-		rerender();
-
-		expect(error.current).toBeInstanceOf(NoTranslationsSet);
+		await waitFor(() =>
+			expect(error.current).toBeInstanceOf(NoTranslationsSet),
+		);
 	});
 });
 
-it("creates a working `createTranslations`", async () => {
+it("creates working hooks", async () => {
 	const { setLocale, t, useLocale, useTranslations } = createTranslations(
 		translations,
 		{ localeFrom: ["en-GB"], translator },
@@ -120,4 +116,27 @@ it("creates a working `createTranslations`", async () => {
 	await waitFor(() =>
 		expect(t(translation.current.string)).toBe(enGB.default.some.deep.string),
 	);
+});
+
+it("creates working functions", async () => {
+	const { getLocale, getTranslations, setLocale } = createTranslations(
+		translations,
+		{
+			localeFrom: ["en-US"],
+			translator,
+		},
+	);
+
+	expect(getLocale()).toBe("en-US");
+	expect(await getTranslations("some")).toBe(enUS.default.some);
+
+	setLocale("en-GB");
+
+	expect(getLocale()).toBe("en-GB");
+	expect(await getTranslations("some")).toBe(enGB.default.some);
+
+	setLocale("en-US");
+
+	expect(getLocale()).toBe("en-US");
+	expect(await getTranslations("some")).toBe(enUS.default.some);
 });
