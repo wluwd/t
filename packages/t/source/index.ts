@@ -1,10 +1,4 @@
-export {
-	NoLocaleFound,
-	NoLocaleSet,
-	NoTranslationsSet,
-	UnknownLocale,
-	createTranslationsFactory,
-} from "~/factory.ts";
+export { createTranslationsFactory } from "~/factory.ts";
 
 export { lazyTranslations } from "~/lazy-loader.ts";
 

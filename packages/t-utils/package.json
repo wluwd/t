@@ -5,6 +5,10 @@
   "description": "",
   "license": "MIT",
   "exports": {
+    "./error": {
+      "types": "./dist/error.d.ts",
+      "import": "./dist/error.js"
+    },
     "./negotiator": {
       "types": "./dist/negotiator.d.ts",
       "import": "./dist/negotiator.js"

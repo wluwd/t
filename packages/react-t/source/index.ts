@@ -1,8 +1,5 @@
-import {
-	NoLocaleSet,
-	NoTranslationsSet,
-	createTranslationsFactory,
-} from "@wluwd/t";
+import { createTranslationsFactory } from "@wluwd/t";
+import { NoLocaleSet, NoTranslationsSet } from "@wluwd/t-utils/error";
 import delve from "dlv";
 import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { useMemo } from "react";
@@ -73,4 +70,4 @@ export const createTranslations = createTranslationsFactory({
 	},
 });
 
-export { NoLocaleSet, NoTranslationsSet, lazyTranslations } from "@wluwd/t";
+export { lazyTranslations } from "@wluwd/t";

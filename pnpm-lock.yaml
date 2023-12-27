@@ -53,6 +53,9 @@ importers:
       '@wluwd/t':
         specifier: workspace:*
         version: link:../t
+      '@wluwd/t-utils':
+        specifier: workspace:*
+        version: link:../t-utils
       dlv:
         specifier: ^1.1.3
         version: 1.1.3

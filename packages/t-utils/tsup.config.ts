@@ -2,7 +2,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
 	dts: true,
-	entry: ["source/negotiator.ts"],
+	entry: ["source/error.ts", "source/negotiator.ts"],
 	format: "esm",
 	outDir: "dist",
 });

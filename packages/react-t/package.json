@@ -22,6 +22,7 @@
   "dependencies": {
     "@fluent/langneg": "^0.7.0",
     "@wluwd/t": "workspace:*",
+    "@wluwd/t-utils": "workspace:*",
     "dlv": "^1.1.3"
   },
   "devDependencies": {
