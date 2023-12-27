@@ -1,0 +1,14 @@
+{
+  "name": "@wluwd/t-utils",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "",
+  "license": "MIT",
+  "exports": {},
+  "scripts": {
+    "build": "tsup",
+    "prelint": "prettier --check .",
+    "lint": "eslint .",
+    "typecheck": "tsc"
+  }
+}
