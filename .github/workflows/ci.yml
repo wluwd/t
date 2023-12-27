@@ -24,6 +24,6 @@ jobs:
       - run: echo node `node --version`, pnpm v`pnpm --version`
       - run: pnpm install --frozen-lockfile
       - run: pnpm --color --recursive run build
-      - run: pnpm --color --recursive run lint
+      - run: pnpm --color --recursive --parallel run lint
       - run: pnpm --color --recursive run typecheck
       - run: pnpm --color run test
