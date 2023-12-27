@@ -1,1 +1,1 @@
-export { createTranslationsFactory } from "~/factory.ts";
+export { createTranslationsFactory } from "./factory.ts";

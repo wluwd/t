@@ -1,5 +1,5 @@
+import { isKeyof } from "./utils.ts";
 import { NoLocaleFound, UnknownLocale } from "@wluwd/t-utils";
-import { isKeyof } from "~/utils.ts";
 
 import type {
 	AnyTranslations,

@@ -1,4 +1,4 @@
-import type { LocaleNegotiators } from "~/negotiator.ts";
+import type { LocaleNegotiators } from "./negotiator.ts";
 
 export class NoLocaleFound extends Error {
 	details: {

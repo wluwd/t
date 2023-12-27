@@ -6,8 +6,8 @@
   "license": "MIT",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./source/index.ts",
+      "import": "./source/index.ts"
     }
   },
   "scripts": {
