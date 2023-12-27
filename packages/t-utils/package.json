@@ -4,7 +4,12 @@
   "version": "0.0.1",
   "description": "",
   "license": "MIT",
-  "exports": {},
+  "exports": {
+    "./negotiator": {
+      "types": "./dist/negotiator.d.ts",
+      "import": "./dist/negotiator.js"
+    }
+  },
   "scripts": {
     "build": "tsup",
     "prelint": "prettier --check .",

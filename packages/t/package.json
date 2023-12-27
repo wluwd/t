@@ -17,6 +17,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@wluwd/t-utils": "workspace:*",
     "type-fest": "^4.8.3"
   }
 }

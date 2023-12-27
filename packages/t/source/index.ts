@@ -5,7 +5,6 @@ export {
 	UnknownLocale,
 	createTranslationsFactory,
 } from "~/factory.ts";
-export type { LocaleNegotiator } from "~/factory.ts";
 
 export { lazyTranslations } from "~/lazy-loader.ts";
 

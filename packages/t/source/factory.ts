@@ -1,5 +1,6 @@
 import { isKeyof } from "~/utils.ts";
 
+import type { LocaleNegotiators } from "@wluwd/t-utils/negotiator";
 import type { Get, Simplify, ValueOf } from "type-fest";
 
 export class NoLocaleFound extends Error {
@@ -107,14 +108,6 @@ interface Fn<
 
 type AnyTranslations = Record<string, unknown>;
 type LazyLoader<Return = AnyTranslations> = () => Promise<Return>;
-
-export type LocaleNegotiator<Locale> = (
-	availableLocales: readonly Locale[],
-) => Locale | undefined;
-
-type LocaleNegotiators<Locale> =
-	| readonly [...(LocaleNegotiator<Locale> | false)[], Locale]
-	| readonly [];
 
 type LocaleSetter<AllowedLocales extends string = string> = (
 	locale: AllowedLocales,

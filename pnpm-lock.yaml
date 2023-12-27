@@ -72,6 +72,9 @@ importers:
 
   packages/t:
     dependencies:
+      '@wluwd/t-utils':
+        specifier: workspace:*
+        version: link:../t-utils
       type-fest:
         specifier: ^4.8.3
         version: 4.8.3
