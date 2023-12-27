@@ -240,7 +240,7 @@ type WithLazyInit<
 	Input extends object,
 > = Lazy extends true
 	? {
-			initTranslator: (locale?: Locale) => void;
+			initTranslator: (negotiators?: LocaleNegotiators<Locale>) => void;
 		} & Input
 	: Input;
 
@@ -325,7 +325,7 @@ export const createTranslationsFactory =
 			>
 		>
 	> => {
-		const initTranslator = (locale?: Locale) => {
+		const initTranslator = (initNegotiators?: LocaleNegotiators<Locale>) => {
 			for (const [locale, loader] of Object.entries(translationLoaders) as [
 				Locale,
 				LazyLoader,
@@ -345,7 +345,7 @@ export const createTranslationsFactory =
 			const availableLocales = Object.keys(translationLoaders) as Locale[];
 
 			const negotiators =
-				locale !== undefined ? ([locale] as const) : localeFrom;
+				initNegotiators !== undefined ? initNegotiators : localeFrom;
 
 			for (const localeGetter of negotiators) {
 				if (localeGetter === false) {
