@@ -283,7 +283,7 @@ export const createTranslationsFactory =
 			translator,
 		}: {
 			cache?: Partial<Record<Locale, Translations>>;
-			localeFrom: LocaleNegotiators<Locale>;
+			localeFrom: LocaleNegotiators<keyof Loaders & string>;
 			translator: Translator;
 		},
 		lazy?: Lazy,
