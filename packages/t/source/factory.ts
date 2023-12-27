@@ -1,6 +1,10 @@
 import { NoLocaleFound, UnknownLocale } from "@wluwd/t-utils/error";
 import { isKeyof } from "~/utils.ts";
 
+import type {
+	AnyTranslations,
+	LazyLoader,
+} from "@wluwd/t-utils/lazy-translations";
 import type { LocaleNegotiators } from "@wluwd/t-utils/negotiator";
 import type { Get, Simplify, ValueOf } from "type-fest";
 
@@ -40,9 +44,6 @@ interface Fn<
 	fn: Fn;
 	name: Name;
 }
-
-type AnyTranslations = Record<string, unknown>;
-type LazyLoader<Return = AnyTranslations> = () => Promise<Return>;
 
 type LocaleSetter<AllowedLocales extends string = string> = (
 	locale: AllowedLocales,
