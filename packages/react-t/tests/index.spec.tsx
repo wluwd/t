@@ -1,7 +1,10 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { NoLocaleSet, NoTranslationsSet } from "@wluwd/t-utils/error";
-import { lazyTranslations } from "@wluwd/t-utils/lazy-translations";
-import { t as translator } from "@wluwd/t-utils/translator";
+import {
+	NoLocaleSet,
+	NoTranslationsSet,
+	lazyTranslations,
+	t as translator,
+} from "@wluwd/t-utils";
 import { createTranslations } from "~/index.ts";
 import { Component } from "react";
 import { describe, expect, it } from "vitest";

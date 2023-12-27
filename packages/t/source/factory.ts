@@ -1,11 +1,11 @@
-import { NoLocaleFound, UnknownLocale } from "@wluwd/t-utils/error";
+import { NoLocaleFound, UnknownLocale } from "@wluwd/t-utils";
 import { isKeyof } from "~/utils.ts";
 
 import type {
 	AnyTranslations,
 	LazyLoader,
-} from "@wluwd/t-utils/lazy-translations";
-import type { LocaleNegotiators } from "@wluwd/t-utils/negotiator";
+	LocaleNegotiators,
+} from "@wluwd/t-utils";
 import type { Get, Simplify, ValueOf } from "type-fest";
 
 type ConcatKeys<

@@ -5,21 +5,9 @@
   "description": "",
   "license": "MIT",
   "exports": {
-    "./error": {
-      "types": "./dist/error.d.ts",
-      "import": "./dist/error.js"
-    },
-    "./lazy-translations": {
-      "types": "./dist/lazy-translations.d.ts",
-      "import": "./dist/lazy-translations.js"
-    },
-    "./negotiator": {
-      "types": "./dist/negotiator.d.ts",
-      "import": "./dist/negotiator.js"
-    },
-    "./translator": {
-      "types": "./dist/translator.d.ts",
-      "import": "./dist/translator.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     }
   },
   "scripts": {

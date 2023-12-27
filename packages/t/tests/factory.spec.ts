@@ -1,5 +1,4 @@
-import { UnknownLocale } from "@wluwd/t-utils/error";
-import { t } from "@wluwd/t-utils/translator";
+import { UnknownLocale, t } from "@wluwd/t-utils";
 import { createTranslationsFactory } from "~/factory.ts";
 import { describe, expect, it, vi } from "vitest";
 

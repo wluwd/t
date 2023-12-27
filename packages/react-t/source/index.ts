@@ -1,5 +1,5 @@
 import { createTranslationsFactory } from "@wluwd/t";
-import { NoLocaleSet, NoTranslationsSet } from "@wluwd/t-utils/error";
+import { NoLocaleSet, NoTranslationsSet } from "@wluwd/t-utils";
 import delve from "dlv";
 import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { useMemo } from "react";
