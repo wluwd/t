@@ -1,4 +1,5 @@
 import { renderHook, waitFor } from "@testing-library/react";
+import { t as translator } from "@wluwd/t";
 import {
 	NoLocaleSet,
 	NoTranslationsSet,
@@ -35,7 +36,10 @@ class ErrorBoundary extends Component<{
 
 describe("throws", () => {
 	it("`NoLocaleSet` when trying to access translations without a specified locale", async () => {
-		const { useLocale, useTranslations } = createTranslations(translations);
+		const { useLocale, useTranslations } = createTranslations(translations, {
+			localeFrom: [],
+			translator,
+		});
 
 		const { result: locale } = renderHook(() => useLocale());
 		expect(locale.current).toBe(undefined);
@@ -54,8 +58,10 @@ describe("throws", () => {
 	});
 
 	it("`NoTranslationsSet` when trying to load translations that have no loader", async () => {
-		const { setLocale, useLocale, useTranslations } =
-			createTranslations(translations);
+		const { setLocale, useLocale, useTranslations } = createTranslations(
+			translations,
+			{ localeFrom: [], translator },
+		);
 
 		const { result: locale } = renderHook(() => useLocale());
 		expect(locale.current).toBe(undefined);
@@ -80,7 +86,7 @@ describe("throws", () => {
 it("creates a working `createTranslations`", async () => {
 	const { setLocale, t, useLocale, useTranslations } = createTranslations(
 		translations,
-		"en-GB",
+		{ localeFrom: ["en-GB"], translator },
 	);
 
 	const { rerender: rerenderLocale, result: locale } = renderHook(() =>
@@ -114,17 +120,4 @@ it("creates a working `createTranslations`", async () => {
 	await waitFor(() =>
 		expect(t(translation.current.string)).toBe(enGB.default.some.deep.string),
 	);
-});
-
-describe("`defaultLocale` strategies", () => {
-	it("`auto` picks up the correct locale", async () => {
-		// @info statically set by happy-dom, should never fail
-		expect(navigator.languages).toEqual(["en-US", "en"]);
-
-		const { useLocale } = createTranslations(translations, ["auto", "en-GB"]);
-
-		const { result: locale } = renderHook(() => useLocale());
-
-		expect(locale.current).toBe("en-US");
-	});
 });

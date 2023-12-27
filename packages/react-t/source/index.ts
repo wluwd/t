@@ -1,4 +1,3 @@
-import { negotiateLanguages } from "@fluent/langneg";
 import {
 	NoLocaleSet,
 	NoTranslationsSet,
@@ -12,74 +11,66 @@ const $locale = atom<string | undefined>(undefined);
 const defaultStore = getDefaultStore();
 
 export const createTranslations = createTranslationsFactory({
-	getTranslationsHook: {
-		factory: ({ cache, lazyLoaders }) => {
-			const $translations = atom(async (get) => {
-				const locale = get($locale);
-
-				if (locale === undefined) {
-					throw new NoLocaleSet();
-				}
-
-				let translations = cache.get(locale);
-
-				if (translations !== undefined) {
-					return translations;
-				}
-
-				const loader = lazyLoaders.get(locale);
-
-				if (loader === undefined) {
-					throw new NoTranslationsSet({
-						availableLocales: Array.from(lazyLoaders.keys()),
-						desiredLocale: locale,
-					});
-				}
-
-				translations = await loader();
-
-				cache.set(locale, translations);
-
-				return translations;
-			});
-
-			return (prefix) => {
-				const translations = useAtomValue($translations);
-
-				// eslint-disable-next-line ts/no-unsafe-return
-				return useMemo(
-					// eslint-disable-next-line ts/no-unsafe-return
-					() => delve(translations, prefix),
-					[prefix, translations],
-				);
-			};
-		},
-		name: "useTranslations",
-	},
+	hasSignalLikeInterface: false,
 	locale: {
-		getter: {
+		hook: {
 			factory: () => () => useAtomValue($locale)!,
 			name: "useLocale",
 		},
-		negotiator: (availableLocales, fallback) =>
-			negotiateLanguages(navigator.languages, availableLocales, {
-				defaultLocale: fallback,
-				strategy: "lookup",
-			})[0] ?? fallback,
 		setter: (locale) => {
 			defaultStore.set($locale, locale);
 		},
 	},
 	resources: {
 		cache: new Map(),
-		lazyLoaders: new Map(),
+		loaders: new Map(),
+	},
+	translations: {
+		hook: {
+			factory: ({ cache, loaders }) => {
+				const $translations = atom(async (get) => {
+					const locale = get($locale);
+
+					if (locale === undefined) {
+						throw new NoLocaleSet();
+					}
+
+					let translations = cache.get(locale);
+
+					if (translations !== undefined) {
+						return translations;
+					}
+
+					const loader = loaders.get(locale);
+
+					if (loader === undefined) {
+						throw new NoTranslationsSet({
+							availableLocales: Array.from(loaders.keys()),
+							desiredLocale: locale,
+						});
+					}
+
+					translations = await loader();
+
+					cache.set(locale, translations);
+
+					return translations;
+				});
+
+				return (prefix) => {
+					const translations = useAtomValue($translations);
+
+					// eslint-disable-next-line ts/no-unsafe-return
+					return useMemo(
+						// eslint-disable-next-line ts/no-unsafe-return
+						() => delve(translations, prefix),
+						[prefix, translations],
+					);
+				};
+			},
+			name: "useTranslations",
+		},
 	},
 });
 
-export {
-	NoLocaleSet,
-	NoTranslationsSet,
-	UnknownDefaultLocale,
-	UnknownDefaultLocaleStrategy,
-	lazyTranslations,
-} from "@wluwd/t";
+export { NoLocaleSet, NoTranslationsSet, lazyTranslations } from "@wluwd/t";
