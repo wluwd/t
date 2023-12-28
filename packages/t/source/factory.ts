@@ -8,12 +8,12 @@ import type {
 } from "@wluwd/t-utils";
 import type { Get, Simplify, ValueOf } from "type-fest";
 
-type ConcatKeys<
+export type ConcatKeys<
 	Previous extends string,
 	New extends string,
 > = Previous extends "" ? New : `${Previous}.${New}`;
 
-type PathsToBranches<
+export type PathsToBranches<
 	Branch extends Record<string, unknown>,
 	KeysFound extends string = "",
 > = Simplify<
@@ -27,9 +27,9 @@ type PathsToBranches<
 > &
 	string;
 
-type AnyFunction = (...args: any) => any;
+export type AnyFunction = (...args: any) => any;
 
-interface Factory<
+export interface Factory<
 	Fn extends AnyFunction = AnyFunction,
 	Name extends string | undefined = string,
 > {
@@ -37,7 +37,7 @@ interface Factory<
 	name: Name;
 }
 
-interface Fn<
+export interface Fn<
 	Fn extends AnyFunction = AnyFunction,
 	Name extends string | undefined = string,
 > {
@@ -45,7 +45,7 @@ interface Fn<
 	name: Name;
 }
 
-type LocaleSetter<AllowedLocales extends string = string> = (
+export type LocaleSetter<AllowedLocales extends string = string> = (
 	locale: AllowedLocales,
 ) => void;
 
@@ -94,14 +94,14 @@ export interface CreateTranslationsFactoryOptions<
 	};
 }
 
-type AnyTranslator = (translation: string, data: any) => string;
+export type AnyTranslator = (translation: string, data: any) => string;
 
-type LocaleGetter<
+export type LocaleGetter<
 	Locale extends string,
 	SignalLike extends boolean,
 > = () => SignalLike extends true ? () => Locale : Locale;
 
-type TranslationsPicker<
+export type TranslationsPicker<
 	Translations extends AnyTranslations,
 	SignalLike extends boolean,
 > = <Prefix extends PathsToBranches<Translations>>(
@@ -110,19 +110,19 @@ type TranslationsPicker<
 	? () => Get<Translations, Prefix>
 	: Get<Translations, Prefix>;
 
-type TranslationsPickerAsync<Translations extends AnyTranslations> = <
+export type TranslationsPickerAsync<Translations extends AnyTranslations> = <
 	Prefix extends PathsToBranches<Translations>,
 >(
 	prefix: Prefix,
 ) => Promise<Get<Translations, Prefix>>;
 
-type LocaleGetterHookBuilder<
+export type LocaleGetterHookBuilder<
 	Options extends Fn<LocaleGetter<string, boolean>, string>,
 > = {
 	[key in Options["name"]]: Options["fn"];
 };
 
-type LocaleGetterFunctionBuilder<
+export type LocaleGetterFunctionBuilder<
 	Options extends Fn<LocaleGetter<string, false>, string> | undefined,
 > = Options extends object
 	? {
@@ -130,13 +130,13 @@ type LocaleGetterFunctionBuilder<
 		}
 	: object;
 
-type TranslationsGetterHookBuilder<
+export type TranslationsGetterHookBuilder<
 	Options extends Fn<TranslationsPicker<AnyTranslations, boolean>, string>,
 > = {
 	[key in Options["name"]]: Options["fn"];
 };
 
-type TranslationsGetterFunctionBuilder<
+export type TranslationsGetterFunctionBuilder<
 	Options extends
 		| Fn<TranslationsPickerAsync<AnyTranslations>, string>
 		| undefined,
@@ -146,7 +146,7 @@ type TranslationsGetterFunctionBuilder<
 		}
 	: object;
 
-type CreateTranslationsInstance<
+export type CreateTranslationsInstance<
 	Locale extends string,
 	Translations extends AnyTranslations,
 	Options extends {
@@ -169,7 +169,7 @@ type CreateTranslationsInstance<
 		t: Options["translator"];
 	};
 
-type WithLazyInit<
+export type WithLazyInit<
 	Lazy extends boolean,
 	Locale extends string,
 	Input extends object,
