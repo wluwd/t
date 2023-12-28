@@ -179,14 +179,75 @@ type WithLazyInit<
 		} & Input
 	: Input;
 
-export const createTranslationsFactory =
-	<
-		SignalLike extends boolean,
-		LocaleGetterHookName extends string,
-		TranslationsGetterHookName extends string,
-		LocaleGetterFunctionName extends string | undefined = undefined,
-		TranslationsGetterFunctionName extends string | undefined = undefined,
-	>({
+export type CreateTranslationsFactory = <
+	SignalLike extends boolean,
+	LocaleGetterHookName extends string,
+	TranslationsGetterHookName extends string,
+	LocaleGetterFunctionName extends string | undefined = undefined,
+	TranslationsGetterFunctionName extends string | undefined = undefined,
+>(
+	options: CreateTranslationsFactoryOptions<
+		SignalLike,
+		LocaleGetterFunctionName,
+		LocaleGetterHookName,
+		TranslationsGetterFunctionName,
+		TranslationsGetterHookName
+	>,
+) => <
+	Loaders extends Record<string, LazyLoader>,
+	Locale extends keyof Loaders & string,
+	Translations extends Awaited<ReturnType<ValueOf<Loaders>>>,
+	Translator extends AnyTranslator,
+	Lazy extends boolean = false,
+>(
+	translationLoaders: Loaders,
+	options: {
+		cache?: Partial<Record<Locale, Translations>>;
+		localeFrom: LocaleNegotiators<keyof Loaders & string>;
+		translator: Translator;
+	},
+	lazy?: Lazy,
+) => Simplify<
+	WithLazyInit<
+		Lazy,
+		Locale,
+		CreateTranslationsInstance<
+			Locale,
+			Translations,
+			{
+				locale: {
+					function: LocaleGetterFunctionName extends undefined
+						? undefined
+						: {
+								fn: LocaleGetter<Locale, false>;
+								name: LocaleGetterFunctionName;
+							};
+					hook: {
+						fn: LocaleGetter<Locale, SignalLike>;
+						name: LocaleGetterHookName;
+					};
+					setter: LocaleSetter<Locale>;
+				};
+				translations: {
+					function: TranslationsGetterFunctionName extends undefined
+						? undefined
+						: {
+								fn: TranslationsPickerAsync<Translations>;
+								name: TranslationsGetterFunctionName;
+							};
+					hook: {
+						fn: TranslationsPicker<Translations, SignalLike>;
+						name: TranslationsGetterHookName;
+					};
+				};
+				translator: Translator;
+			}
+		>
+	>
+>;
+
+export const createTranslationsFactory: CreateTranslationsFactory =
+	({
 		locale: {
 			fn: localeFn,
 			hook: { factory: localeHookFactory, name: localeHookName },
@@ -197,87 +258,27 @@ export const createTranslationsFactory =
 			fn: translationsFn,
 			hook: { factory: translationsHookFactory, name: translationsHookName },
 		},
-	}: CreateTranslationsFactoryOptions<
-		SignalLike,
-		LocaleGetterFunctionName,
-		LocaleGetterHookName,
-		TranslationsGetterFunctionName,
-		TranslationsGetterHookName
-	>) =>
-	<
-		Loaders extends Record<string, LazyLoader>,
-		Locale extends keyof Loaders & string,
-		Translations extends Awaited<ReturnType<ValueOf<Loaders>>>,
-		Translator extends AnyTranslator,
-		Lazy extends boolean = false,
-	>(
-		translationLoaders: Loaders,
-		{
-			cache: initialCache,
-			localeFrom: negotiators,
-			translator,
-		}: {
-			cache?: Partial<Record<Locale, Translations>>;
-			localeFrom: LocaleNegotiators<keyof Loaders & string>;
-			translator: Translator;
-		},
-		lazy?: Lazy,
-	): Simplify<
-		WithLazyInit<
-			Lazy,
-			Locale,
-			CreateTranslationsInstance<
-				Locale,
-				Translations,
-				{
-					locale: {
-						function: LocaleGetterFunctionName extends undefined
-							? undefined
-							: {
-									fn: LocaleGetter<Locale, false>;
-									name: LocaleGetterFunctionName;
-								};
-						hook: {
-							fn: LocaleGetter<Locale, SignalLike>;
-							name: LocaleGetterHookName;
-						};
-						setter: LocaleSetter<Locale>;
-					};
-					translations: {
-						function: TranslationsGetterFunctionName extends undefined
-							? undefined
-							: {
-									fn: TranslationsPickerAsync<Translations>;
-									name: TranslationsGetterFunctionName;
-								};
-						hook: {
-							fn: TranslationsPicker<Translations, SignalLike>;
-							name: TranslationsGetterHookName;
-						};
-					};
-					translator: Translator;
-				}
-			>
-		>
-	> => {
-		const initTranslator = (initNegotiators?: LocaleNegotiators<Locale>) => {
-			for (const [locale, loader] of Object.entries(translationLoaders) as [
-				Locale,
-				LazyLoader,
-			][]) {
+	}) =>
+	(
+		translationLoaders,
+		{ cache: initialCache, localeFrom: negotiators, translator },
+		lazy,
+	) => {
+		const initTranslator = (initNegotiators?: LocaleNegotiators<string>) => {
+			for (const [locale, loader] of Object.entries(translationLoaders)) {
 				loaders.set(locale, loader);
 			}
 
 			if (initialCache) {
 				for (const [locale, translations] of Object.entries(initialCache) as [
-					Locale,
-					Translations,
+					string,
+					AnyTranslations,
 				][]) {
 					globalCache.set(locale, translations);
 				}
 			}
 
-			const availableLocales = Object.keys(translationLoaders) as Locale[];
+			const availableLocales = Object.keys(translationLoaders);
 
 			const activeNegotiators =
 				initNegotiators !== undefined ? initNegotiators : negotiators;
