@@ -175,7 +175,7 @@ export type WithLazyInit<
 	Input extends object,
 > = Lazy extends true
 	? {
-			initTranslator: (negotiators?: LocaleNegotiators<Locale>) => void;
+			init: (negotiators?: LocaleNegotiators<Locale>) => void;
 		} & Input
 	: Input;
 
@@ -264,7 +264,7 @@ export const createTranslationsFactory: CreateTranslationsFactory =
 		{ cache: initialCache, localeFrom: negotiators, translator },
 		lazy,
 	) => {
-		const initTranslator = (initNegotiators?: LocaleNegotiators<string>) => {
+		const init = (initNegotiators?: LocaleNegotiators<string>) => {
 			for (const [locale, loader] of Object.entries(translationLoaders)) {
 				loaders.set(locale, loader);
 			}
@@ -317,13 +317,13 @@ export const createTranslationsFactory: CreateTranslationsFactory =
 		};
 
 		if (lazy !== true) {
-			initTranslator();
+			init();
 		}
 
 		// eslint-disable-next-line ts/no-unsafe-return
 		return <any>{
 			...(lazy && {
-				initTranslator,
+				init,
 			}),
 			[localeHookName]: localeHookFactory(),
 			...(localeFn?.name && { [localeFn.name]: localeFn.factory() }),
