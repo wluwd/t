@@ -40,7 +40,7 @@ const getMocks = () => {
 			"en-GB": () => Promise.resolve(enGB),
 			"en-US": () => Promise.resolve(enUS),
 		},
-		{ localeFrom: [], translator },
+		{ localeSource: [], translator },
 	] as const;
 };
 
@@ -77,7 +77,7 @@ describe("`defaultLocale`", () => {
 		const [options, _, loaders] = getMocks();
 
 		createTranslationsFactory(options)(loaders, {
-			localeFrom: ["en-GB"],
+			localeSource: ["en-GB"],
 			translator,
 		});
 
@@ -89,7 +89,7 @@ describe("`defaultLocale`", () => {
 
 		try {
 			// @ts-expect-error unknown locale
-			createTranslationsFactory(options)(loaders, { localeFrom: ["it-IT"] });
+			createTranslationsFactory(options)(loaders, { localeSource: ["it-IT"] });
 			expect.unreachable();
 		} catch (error) {
 			expect(error).toBeInstanceOf(UnknownLocale);

@@ -35,7 +35,7 @@ class ErrorBoundary extends Component<{
 describe("throws", () => {
 	it("`NoLocaleSet` when trying to access translations without a specified locale", async () => {
 		const { useLocale, useTranslations } = createTranslations(translations, {
-			localeFrom: [],
+			localeSource: [],
 			translator,
 		});
 
@@ -56,7 +56,7 @@ describe("throws", () => {
 	it("`NoTranslationsSet` when trying to load translations that have no loader", async () => {
 		const { setLocale, useLocale, useTranslations } = createTranslations(
 			translations,
-			{ localeFrom: [], translator },
+			{ localeSource: [], translator },
 		);
 
 		const { result: locale } = renderHook(() => useLocale());
@@ -82,7 +82,7 @@ describe("throws", () => {
 it("creates working hooks", async () => {
 	const { setLocale, t, useLocale, useTranslations } = createTranslations(
 		translations,
-		{ localeFrom: ["en-GB"], translator },
+		{ localeSource: ["en-GB"], translator },
 	);
 
 	const { rerender: rerenderLocale, result: locale } = renderHook(() =>
@@ -122,7 +122,7 @@ it("creates working functions", async () => {
 	const { getLocale, getTranslations, setLocale } = createTranslations(
 		translations,
 		{
-			localeFrom: ["en-US"],
+			localeSource: ["en-US"],
 			translator,
 		},
 	);

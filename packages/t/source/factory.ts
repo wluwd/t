@@ -203,7 +203,7 @@ export type CreateTranslationsFactory = <
 	translationLoaders: Loaders,
 	options: {
 		cache?: Partial<Record<Locale, Translations>>;
-		localeFrom: LocaleNegotiators<keyof Loaders & string>;
+		localeSource: LocaleNegotiators<keyof Loaders & string>;
 		translator: Translator;
 	},
 	lazy?: Lazy,
@@ -261,7 +261,7 @@ export const createTranslationsFactory: CreateTranslationsFactory =
 	}) =>
 	(
 		translationLoaders,
-		{ cache: initialCache, localeFrom: negotiators, translator },
+		{ cache: initialCache, localeSource: negotiators, translator },
 		lazy,
 	) => {
 		const init = (initNegotiators?: LocaleNegotiators<string>) => {
