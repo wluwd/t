@@ -28,7 +28,5 @@ export const negotiator: (
 	(requestedLocales, algorithm) => (availableLocales) =>
 		algorithm(requestedLocales, availableLocales)[0];
 
-export const browser = negotiator(
-	globalThis.navigator?.languages ?? [],
-	lookup,
-);
+export const browser = () =>
+	negotiator(globalThis.navigator?.languages ?? [], lookup);
