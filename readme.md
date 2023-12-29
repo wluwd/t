@@ -43,7 +43,7 @@ import { browser, lazyTranslations, translator } from "@wluwd/t-utils";
 
 export const { setLocale, useLocale, useTranslations, t } = createTranslations(
 	{
-		"en-US": lazyTranslations(() => import("./en-us.ts")),
+		"en-US": lazyTranslations(() => import("./en-US.ts")),
 		"it-IT": lazyTranslations(() => import("./it-IT.ts")),
 	},
 	{
