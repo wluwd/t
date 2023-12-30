@@ -94,7 +94,7 @@ export interface CreateDefineTranslationsConfigOptions<
 	};
 }
 
-export type AnyTranslator = (translation: string, data: any) => string;
+export type AnyFormatter = (translation: string, data: any) => string;
 
 export type LocaleGetter<
 	Locale extends string,
@@ -150,6 +150,7 @@ export type DefineTranslationsConfig<
 	Locale extends string,
 	Translations extends AnyTranslations,
 	Options extends {
+		formatter: AnyFormatter;
 		locale: {
 			function?: Fn<LocaleGetter<Locale, false>, string>;
 			hook: Fn<LocaleGetter<Locale, boolean>, string>;
@@ -159,14 +160,13 @@ export type DefineTranslationsConfig<
 			function?: Fn<TranslationsPickerAsync<Translations>, string>;
 			hook: Fn<TranslationsPicker<Translations, boolean>, string>;
 		};
-		translator: AnyTranslator;
 	},
 > = LocaleGetterHookBuilder<Options["locale"]["hook"]> &
 	LocaleGetterFunctionBuilder<Options["locale"]["function"]> &
 	TranslationsGetterHookBuilder<Options["translations"]["hook"]> &
 	TranslationsGetterFunctionBuilder<Options["translations"]["function"]> & {
 		setLocale: Options["locale"]["setter"];
-		t: Options["translator"];
+		t: Options["formatter"];
 	};
 
 export type WithLazyInit<
@@ -197,14 +197,14 @@ export type CreateDefineTranslationsConfig = <
 	Loaders extends Record<string, LazyLoader>,
 	Locale extends keyof Loaders & string,
 	Translations extends Awaited<ReturnType<ValueOf<Loaders>>>,
-	Translator extends AnyTranslator,
+	Formatter extends AnyFormatter,
 	Lazy extends boolean = false,
 >(
 	translationLoaders: Loaders,
 	options: {
 		cache?: Partial<Record<Locale, Translations>>;
+		formatter: Formatter;
 		localeSource: LocaleNegotiators<keyof Loaders & string>;
-		translator: Translator;
 	},
 	lazy?: Lazy,
 ) => Simplify<
@@ -215,6 +215,7 @@ export type CreateDefineTranslationsConfig = <
 			Locale,
 			Translations,
 			{
+				formatter: Formatter;
 				locale: {
 					function: LocaleGetterFunctionName extends undefined
 						? undefined
@@ -240,7 +241,6 @@ export type CreateDefineTranslationsConfig = <
 						name: TranslationsGetterHookName;
 					};
 				};
-				translator: Translator;
 			}
 		>
 	>
@@ -261,7 +261,7 @@ export const createDefineTranslationsConfig: CreateDefineTranslationsConfig =
 	}) =>
 	(
 		translationLoaders,
-		{ cache: initialCache, localeSource: negotiators, translator },
+		{ cache: initialCache, formatter: translator, localeSource: negotiators },
 		lazy,
 	) => {
 		const init = (initNegotiators?: LocaleNegotiators<string>) => {

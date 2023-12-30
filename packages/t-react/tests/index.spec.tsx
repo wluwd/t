@@ -37,8 +37,8 @@ describe("throws", () => {
 		const { useLocale, useTranslations } = defineTranslationsConfig(
 			translations,
 			{
+				formatter: translator,
 				localeSource: [],
-				translator,
 			},
 		);
 
@@ -59,7 +59,7 @@ describe("throws", () => {
 	it("`NoTranslationsSet` when trying to load translations that have no loader", async () => {
 		const { setLocale, useLocale, useTranslations } = defineTranslationsConfig(
 			translations,
-			{ localeSource: [], translator },
+			{ formatter: translator, localeSource: [] },
 		);
 
 		const { result: locale } = renderHook(() => useLocale());
@@ -85,7 +85,7 @@ describe("throws", () => {
 it("creates working hooks", async () => {
 	const { setLocale, t, useLocale, useTranslations } = defineTranslationsConfig(
 		translations,
-		{ localeSource: ["en-GB"], translator },
+		{ formatter: translator, localeSource: ["en-GB"] },
 	);
 
 	const { rerender: rerenderLocale, result: locale } = renderHook(() =>
@@ -125,8 +125,8 @@ it("creates working functions", async () => {
 	const { getLocale, getTranslations, setLocale } = defineTranslationsConfig(
 		translations,
 		{
+			formatter: translator,
 			localeSource: ["en-US"],
-			translator,
 		},
 	);
 

@@ -40,7 +40,7 @@ const getMocks = () => {
 			"en-GB": () => Promise.resolve(enGB),
 			"en-US": () => Promise.resolve(enUS),
 		},
-		{ localeSource: [], translator },
+		{ formatter: translator, localeSource: [] },
 	] as const;
 };
 
@@ -77,8 +77,8 @@ describe("`defaultLocale`", () => {
 		const [options, _, loaders] = getMocks();
 
 		createDefineTranslationsConfig(options)(loaders, {
+			formatter: translator,
 			localeSource: ["en-GB"],
-			translator,
 		});
 
 		expect(options.locale.setter).toHaveBeenCalledWith("en-GB");
