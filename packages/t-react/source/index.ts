@@ -1,10 +1,10 @@
-import { createTranslationsFactory } from "@wluwd/t";
+import { createDefineTranslationsConfig } from "@wluwd/t";
 import { NoLocaleSet, NoTranslationsSet } from "@wluwd/t-utils";
 import delve from "dlv";
 import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { useMemo } from "react";
 
-import type { CreateTranslationsFactoryOptions } from "@wluwd/t";
+import type { CreateDefineTranslationsConfigOptions } from "@wluwd/t";
 
 const $locale = atom<string | undefined>(undefined);
 const defaultStore = getDefaultStore();
@@ -14,7 +14,7 @@ const loadAndCacheTranslations = async (
 	{
 		cache,
 		loaders,
-	}: CreateTranslationsFactoryOptions<
+	}: CreateDefineTranslationsConfigOptions<
 		boolean,
 		string,
 		string,
@@ -48,7 +48,7 @@ const loadAndCacheTranslations = async (
 	return translations;
 };
 
-export const createTranslations = createTranslationsFactory({
+export const createTranslations = createDefineTranslationsConfig({
 	hasSignalLikeInterface: false,
 	locale: {
 		fn: {

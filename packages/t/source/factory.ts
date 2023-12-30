@@ -49,7 +49,7 @@ export type LocaleSetter<AllowedLocales extends string = string> = (
 	locale: AllowedLocales,
 ) => void;
 
-export interface CreateTranslationsFactoryOptions<
+export interface CreateDefineTranslationsConfigOptions<
 	SignalLike extends boolean,
 	LocaleGetterFunctionName extends string | undefined,
 	LocaleGetterHookName extends string,
@@ -69,7 +69,7 @@ export interface CreateTranslationsFactoryOptions<
 	translations: {
 		fn?: Factory<
 			(
-				resources: CreateTranslationsFactoryOptions<
+				resources: CreateDefineTranslationsConfigOptions<
 					SignalLike,
 					string,
 					string,
@@ -81,7 +81,7 @@ export interface CreateTranslationsFactoryOptions<
 		>;
 		hook: Factory<
 			(
-				resources: CreateTranslationsFactoryOptions<
+				resources: CreateDefineTranslationsConfigOptions<
 					SignalLike,
 					string,
 					string,
@@ -146,7 +146,7 @@ export type TranslationsGetterFunctionBuilder<
 		}
 	: object;
 
-export type CreateTranslationsInstance<
+export type DefineTranslationsConfig<
 	Locale extends string,
 	Translations extends AnyTranslations,
 	Options extends {
@@ -179,14 +179,14 @@ export type WithLazyInit<
 		} & Input
 	: Input;
 
-export type CreateTranslationsFactory = <
+export type CreateDefineTranslationsConfig = <
 	SignalLike extends boolean,
 	LocaleGetterHookName extends string,
 	TranslationsGetterHookName extends string,
 	LocaleGetterFunctionName extends string | undefined = undefined,
 	TranslationsGetterFunctionName extends string | undefined = undefined,
 >(
-	options: CreateTranslationsFactoryOptions<
+	options: CreateDefineTranslationsConfigOptions<
 		SignalLike,
 		LocaleGetterFunctionName,
 		LocaleGetterHookName,
@@ -211,7 +211,7 @@ export type CreateTranslationsFactory = <
 	WithLazyInit<
 		Lazy,
 		Locale,
-		CreateTranslationsInstance<
+		DefineTranslationsConfig<
 			Locale,
 			Translations,
 			{
@@ -246,7 +246,7 @@ export type CreateTranslationsFactory = <
 	>
 >;
 
-export const createTranslationsFactory: CreateTranslationsFactory =
+export const createDefineTranslationsConfig: CreateDefineTranslationsConfig =
 	({
 		locale: {
 			fn: localeFn,

@@ -1,8 +1,8 @@
 import { UnknownLocale, translator } from "@wluwd/t-utils";
-import { createTranslationsFactory } from "~/factory.ts";
+import { createDefineTranslationsConfig } from "~/factory.ts";
 import { describe, expect, it, vi } from "vitest";
 
-import type { CreateTranslationsFactoryOptions } from "~/factory.ts";
+import type { CreateDefineTranslationsConfigOptions } from "~/factory.ts";
 
 const enGB = { some: { deep: { string: "en-GB" } } };
 const enUS = { some: { deep: { string: "en-US" } } };
@@ -28,7 +28,7 @@ const getMocks = () => {
 					name: "useTranslations",
 				},
 			},
-		} satisfies CreateTranslationsFactoryOptions<
+		} satisfies CreateDefineTranslationsConfigOptions<
 			false,
 			undefined,
 			"useLocale",
@@ -47,7 +47,7 @@ const getMocks = () => {
 it("creates a working `createTranslations` function", () => {
 	const [factoryOptions, hooks, loaders, instanceOptions] = getMocks();
 
-	const translations = createTranslationsFactory(factoryOptions)(
+	const translations = createDefineTranslationsConfig(factoryOptions)(
 		loaders,
 		instanceOptions,
 	);
@@ -76,7 +76,7 @@ describe("`defaultLocale`", () => {
 	it("calls `locale.setter` when it's a string", () => {
 		const [options, _, loaders] = getMocks();
 
-		createTranslationsFactory(options)(loaders, {
+		createDefineTranslationsConfig(options)(loaders, {
 			localeSource: ["en-GB"],
 			translator,
 		});
@@ -88,8 +88,10 @@ describe("`defaultLocale`", () => {
 		const [options, _, loaders] = getMocks();
 
 		try {
-			// @ts-expect-error unknown locale
-			createTranslationsFactory(options)(loaders, { localeSource: ["it-IT"] });
+			createDefineTranslationsConfig(options)(loaders, {
+				// @ts-expect-error unknown locale
+				localeSource: ["it-IT"],
+			});
 			expect.unreachable();
 		} catch (error) {
 			expect(error).toBeInstanceOf(UnknownLocale);
