@@ -48,7 +48,7 @@ const loadAndCacheTranslations = async (
 	return translations;
 };
 
-export const createTranslations = createDefineTranslationsConfig({
+export const defineTranslationsConfig = createDefineTranslationsConfig({
 	hasSignalLikeInterface: false,
 	locale: {
 		fn: {

@@ -5,7 +5,7 @@ import {
 	lazyTranslations,
 	translator,
 } from "@wluwd/t-utils";
-import { createTranslations } from "~/index.ts";
+import { defineTranslationsConfig } from "~/index.ts";
 import { Component } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -34,10 +34,13 @@ class ErrorBoundary extends Component<{
 
 describe("throws", () => {
 	it("`NoLocaleSet` when trying to access translations without a specified locale", async () => {
-		const { useLocale, useTranslations } = createTranslations(translations, {
-			localeSource: [],
-			translator,
-		});
+		const { useLocale, useTranslations } = defineTranslationsConfig(
+			translations,
+			{
+				localeSource: [],
+				translator,
+			},
+		);
 
 		const { result: locale } = renderHook(() => useLocale());
 		expect(locale.current).toBe(undefined);
@@ -54,7 +57,7 @@ describe("throws", () => {
 	});
 
 	it("`NoTranslationsSet` when trying to load translations that have no loader", async () => {
-		const { setLocale, useLocale, useTranslations } = createTranslations(
+		const { setLocale, useLocale, useTranslations } = defineTranslationsConfig(
 			translations,
 			{ localeSource: [], translator },
 		);
@@ -80,7 +83,7 @@ describe("throws", () => {
 });
 
 it("creates working hooks", async () => {
-	const { setLocale, t, useLocale, useTranslations } = createTranslations(
+	const { setLocale, t, useLocale, useTranslations } = defineTranslationsConfig(
 		translations,
 		{ localeSource: ["en-GB"], translator },
 	);
@@ -119,7 +122,7 @@ it("creates working hooks", async () => {
 });
 
 it("creates working functions", async () => {
-	const { getLocale, getTranslations, setLocale } = createTranslations(
+	const { getLocale, getTranslations, setLocale } = defineTranslationsConfig(
 		translations,
 		{
 			localeSource: ["en-US"],
