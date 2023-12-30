@@ -1,15 +1,15 @@
-import { translator } from "~/translator.ts";
+import { formatter } from "~/formatter.ts";
 import { expect, it } from "vitest";
 
 it("swaps `{{placeholder}}` with the `placeholder` property provided", () => {
-	expect(translator("{{placeholder}}", { placeholder: "string" })).toBe(
+	expect(formatter("{{placeholder}}", { placeholder: "string" })).toBe(
 		"string",
 	);
 });
 
 it("calls the property's `toString` method", () => {
 	expect(
-		translator("{{placeholder}}", {
+		formatter("{{placeholder}}", {
 			// @ts-expect-error types allows only for strings
 			placeholder: { toString: () => "string" },
 		}),
@@ -18,11 +18,9 @@ it("calls the property's `toString` method", () => {
 
 it("doesn't throw when the required property is not set", () => {
 	// @ts-expect-error placeholder not provided
-	expect(translator("{{placeholder}}", {})).toBe(
+	expect(formatter("{{placeholder}}", {})).toBe(
 		"[`placeholder` was not provided]",
 	);
 	// @ts-expect-error entire object not provided
-	expect(translator("{{placeholder}}")).toBe(
-		"[`placeholder` was not provided]",
-	);
+	expect(formatter("{{placeholder}}")).toBe("[`placeholder` was not provided]");
 });

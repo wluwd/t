@@ -2,8 +2,8 @@ import { renderHook, waitFor } from "@testing-library/react";
 import {
 	NoLocaleSet,
 	NoTranslationsSet,
+	formatter,
 	lazyTranslations,
-	translator,
 } from "@wluwd/t-utils";
 import { defineTranslationsConfig } from "~/index.ts";
 import { Component } from "react";
@@ -37,7 +37,7 @@ describe("throws", () => {
 		const { useLocale, useTranslations } = defineTranslationsConfig(
 			translations,
 			{
-				formatter: translator,
+				formatter,
 				localeSource: [],
 			},
 		);
@@ -59,7 +59,7 @@ describe("throws", () => {
 	it("`NoTranslationsSet` when trying to load translations that have no loader", async () => {
 		const { setLocale, useLocale, useTranslations } = defineTranslationsConfig(
 			translations,
-			{ formatter: translator, localeSource: [] },
+			{ formatter, localeSource: [] },
 		);
 
 		const { result: locale } = renderHook(() => useLocale());
@@ -85,7 +85,7 @@ describe("throws", () => {
 it("creates working hooks", async () => {
 	const { setLocale, t, useLocale, useTranslations } = defineTranslationsConfig(
 		translations,
-		{ formatter: translator, localeSource: ["en-GB"] },
+		{ formatter, localeSource: ["en-GB"] },
 	);
 
 	const { rerender: rerenderLocale, result: locale } = renderHook(() =>
@@ -125,7 +125,7 @@ it("creates working functions", async () => {
 	const { getLocale, getTranslations, setLocale } = defineTranslationsConfig(
 		translations,
 		{
-			formatter: translator,
+			formatter,
 			localeSource: ["en-US"],
 		},
 	);

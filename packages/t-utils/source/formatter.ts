@@ -11,7 +11,7 @@ type ExtractArguments<
 				[k in Needles[number]]: string;
 			};
 
-export type Translator = <
+export type Formatter = <
 	Translation extends string,
 	Data extends Simplify<UnionToIntersection<ExtractArguments<Translation>>>,
 >(
@@ -19,7 +19,7 @@ export type Translator = <
 	...[data]: [Data] extends [never] ? [data?: undefined] : [data: Data]
 ) => string;
 
-export const translator: Translator = (translation, ...[data]) =>
+export const formatter: Formatter = (translation, ...[data]) =>
 	translation?.replace(
 		/{{(\w+)}}/g,
 		(_rawMatch, property: string) =>
