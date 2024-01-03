@@ -3,7 +3,17 @@
   "type": "module",
   "version": "0.0.1",
   "description": "",
+  "author": "Raul Macarie <npm@macarie.me>",
   "license": "MIT",
+  "homepage": "https://github.com/wluwd/t",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wluwd/t.git",
+    "directory": "packages/t-react"
+  },
+  "bugs": {
+    "url": "https://github.com/wluwd/t/issues"
+  },
   "exports": {
     ".": {
       "types": "./source/index.ts",
