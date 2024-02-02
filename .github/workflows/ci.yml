@@ -26,3 +26,5 @@ jobs:
       - run: pnpm --color --recursive --parallel run lint
       - run: pnpm --color --recursive run typecheck
       - run: pnpm --color run test
+      # @info check if `createDefineTranslationsConfig`'s return type can be inferred
+      - run: pnpm --color --parallel --filter t-react run build
