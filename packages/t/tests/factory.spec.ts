@@ -1,4 +1,4 @@
-import { UnknownLocale, formatter } from "@wluwd/t-utils";
+import { NoLocaleFound, UnknownLocale, formatter } from "@wluwd/t-utils";
 import { createDefineTranslationsConfig } from "~/factory.ts";
 import { describe, expect, it, vi } from "vitest";
 
@@ -146,6 +146,26 @@ describe("`defaultLocale`", () => {
 				availableLocales: ["en-GB", "en-US"],
 				desiredLocale: "it-IT",
 				negotiator: "it-IT",
+			});
+		}
+	});
+
+	it("throws `NoLocaleFound` when all negotiators fail to find a locale", () => {
+		const [options, _, loaders] = getMocks();
+		const negotiators = [() => undefined];
+
+		try {
+			createDefineTranslationsConfig(false, options)(loaders, {
+				formatter,
+				// @ts-expect-error no fallback locale
+				localeSource: negotiators,
+			});
+			expect.unreachable();
+		} catch (error) {
+			expect(error).toBeInstanceOf(NoLocaleFound);
+			expect((error as NoLocaleFound).details).toEqual({
+				availableLocales: ["en-GB", "en-US"],
+				negotiators,
 			});
 		}
 	});
