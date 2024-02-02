@@ -100,6 +100,25 @@ it("uses initial cache", async () => {
 	expect(await getTranslations("some")).toBe(enUSCached);
 });
 
+it("can be lazy initialized", async () => {
+	const [options, hooks, loaders] = getMocks();
+
+	const { init } = createDefineTranslationsConfig(false, options)(
+		loaders,
+		{
+			formatter,
+			localeSource: ["en-US"],
+		},
+		true,
+	);
+
+	expect(hooks.setLocale).toHaveBeenCalledTimes(0);
+
+	init(["en-GB"]);
+
+	expect(hooks.setLocale).toHaveBeenLastCalledWith("en-GB");
+});
+
 describe("`defaultLocale`", () => {
 	it("calls `locale.setter` when it's a string", () => {
 		const [options, { setLocale }, loaders] = getMocks();
