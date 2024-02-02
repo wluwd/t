@@ -131,6 +131,17 @@ describe("`defaultLocale`", () => {
 		expect(setLocale).toHaveBeenCalledWith("en-GB");
 	});
 
+	it("skips `false` in negotiators", async () => {
+		const [options, { setLocale }, loaders] = getMocks();
+
+		createDefineTranslationsConfig(false, options)(loaders, {
+			formatter,
+			localeSource: [false, "en-GB"],
+		});
+
+		expect(setLocale).toHaveBeenCalledWith("en-GB");
+	});
+
 	it("throws `UnknownDefaultLocale` when using an unknown locale", () => {
 		const [options, _, loaders] = getMocks();
 
