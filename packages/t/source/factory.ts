@@ -2,279 +2,179 @@ import { isKeyof } from "./utils.ts";
 import { NoLocaleFound, UnknownLocale } from "@wluwd/t-utils";
 
 import type {
+	AnyFormatter,
+	ExtractTranslations,
+	FromNamedFactory,
+	NamedFactory,
+	PathsToBranches,
+} from "./utils.ts";
+import type {
 	AnyTranslations,
 	LazyLoader,
 	LocaleNegotiators,
 } from "@wluwd/t-utils";
-import type { Get, Simplify, ValueOf } from "type-fest";
+import type {
+	Get,
+	Promisable,
+	RequiredDeep,
+	Simplify,
+	ValueOf,
+} from "type-fest";
 
-export type ConcatKeys<
-	Previous extends string,
-	New extends string,
-> = Previous extends "" ? New : `${Previous}.${New}`;
+export type TranslationsPicker<
+	SignalInterface extends boolean,
+	Translations extends AnyTranslations = AnyTranslations,
+> = <Prefix extends PathsToBranches<Translations>>(
+	prefix: Prefix,
+) => SignalInterface extends true
+	? () => Get<Translations, Prefix>
+	: Get<Translations, Prefix>;
 
-export type PathsToBranches<
-	Branch extends Record<string, unknown>,
-	KeysFound extends string = "",
-> = Simplify<
-	{
-		[K in keyof Branch & string]: Branch[K] extends Record<string, unknown>
-			?
-					| ConcatKeys<KeysFound, K>
-					| PathsToBranches<Branch[K], ConcatKeys<KeysFound, K>>
-			: KeysFound;
-	}[keyof Branch & string]
-> &
-	string;
+export type AsyncTranslationsPicker<
+	Translations extends AnyTranslations = AnyTranslations,
+> = <Prefix extends PathsToBranches<Translations>>(
+	prefix: Prefix,
+) => Promisable<Get<Translations, Prefix>>;
 
-export type AnyFunction = (...args: any) => any;
-
-export interface Factory<
-	Fn extends AnyFunction = AnyFunction,
-	Name extends string | undefined = string,
-> {
-	factory: Fn;
-	name: Name;
-}
-
-export interface Fn<
-	Fn extends AnyFunction = AnyFunction,
-	Name extends string | undefined = string,
-> {
-	fn: Fn;
-	name: Name;
-}
+export type LocaleGetter<
+	SignalInterface extends boolean,
+	Locale extends string = string,
+> = () => SignalInterface extends true ? () => Locale : Locale;
 
 export type LocaleSetter<AllowedLocales extends string = string> = (
 	locale: AllowedLocales,
 ) => void;
 
-export interface CreateDefineTranslationsConfigOptions<
-	SignalLike extends boolean,
-	LocaleGetterFunctionName extends string | undefined,
-	LocaleGetterHookName extends string,
-	TranslationsGetterFunctionName extends string | undefined,
-	TranslationsGetterHookName extends string,
+export interface Options<
+	SignalInterface extends boolean = false,
+	Loaders extends Record<string, LazyLoader> = Record<string, LazyLoader>,
+	Locale extends string = keyof Loaders & string,
+	Translations extends AnyTranslations = ValueOf<ExtractTranslations<Loaders>>,
 > {
-	hasSignalLikeInterface: SignalLike;
 	locale: {
-		fn?: Factory<() => LocaleGetter<string, false>, LocaleGetterFunctionName>;
-		hook: Factory<() => LocaleGetter<string, SignalLike>, LocaleGetterHookName>;
-		setter: LocaleSetter<string>;
+		fn?: NamedFactory<() => LocaleGetter<SignalInterface, Locale>>;
+		hook: NamedFactory<() => LocaleGetter<SignalInterface, Locale>>;
+		setter: NamedFactory<() => LocaleSetter<Locale>>;
 	};
 	resources: {
-		cache: Map<string, AnyTranslations>;
+		cache: Map<string, Translations>;
 		loaders: Map<string, LazyLoader>;
 	};
 	translations: {
-		fn?: Factory<
+		fn?: NamedFactory<
 			(
-				resources: CreateDefineTranslationsConfigOptions<
-					SignalLike,
-					string,
-					string,
-					string,
-					string
-				>["resources"],
-			) => TranslationsPickerAsync<AnyTranslations>,
-			TranslationsGetterFunctionName
+				loader: Options["translations"]["loader"],
+				resources: Options["resources"],
+			) => AsyncTranslationsPicker<Translations>
 		>;
-		hook: Factory<
+		hook: NamedFactory<
 			(
-				resources: CreateDefineTranslationsConfigOptions<
-					SignalLike,
-					string,
-					string,
-					string,
-					string
-				>["resources"],
-			) => TranslationsPicker<AnyTranslations, SignalLike>,
-			TranslationsGetterHookName
+				loader: Options["translations"]["loader"],
+				resources: Options["resources"],
+			) => TranslationsPicker<SignalInterface, Translations>
 		>;
+		loader: (
+			locale: string | undefined,
+			resources: Options["resources"],
+		) => Promisable<Translations>;
 	};
 }
 
-export type AnyFormatter = (translation: string, data: any) => string;
+export type LazyInit<Locale extends string> = (
+	negotiators?: LocaleNegotiators<Locale>,
+) => void;
 
-export type LocaleGetter<
-	Locale extends string,
-	SignalLike extends boolean,
-> = () => SignalLike extends true ? () => Locale : Locale;
-
-export type TranslationsPicker<
-	Translations extends AnyTranslations,
-	SignalLike extends boolean,
-> = <Prefix extends PathsToBranches<Translations>>(
-	prefix: Prefix,
-) => SignalLike extends true
-	? () => Get<Translations, Prefix>
-	: Get<Translations, Prefix>;
-
-export type TranslationsPickerAsync<Translations extends AnyTranslations> = <
-	Prefix extends PathsToBranches<Translations>,
->(
-	prefix: Prefix,
-) => Promise<Get<Translations, Prefix>>;
-
-export type LocaleGetterHookBuilder<
-	Options extends Fn<LocaleGetter<string, boolean>, string>,
-> = {
-	[key in Options["name"]]: Options["fn"];
-};
-
-export type LocaleGetterFunctionBuilder<
-	Options extends Fn<LocaleGetter<string, false>, string> | undefined,
-> = Options extends object
-	? {
-			[key in Options["name"]]: Options["fn"];
-		}
-	: object;
-
-export type TranslationsGetterHookBuilder<
-	Options extends Fn<TranslationsPicker<AnyTranslations, boolean>, string>,
-> = {
-	[key in Options["name"]]: Options["fn"];
-};
-
-export type TranslationsGetterFunctionBuilder<
-	Options extends
-		| Fn<TranslationsPickerAsync<AnyTranslations>, string>
-		| undefined,
-> = Options extends object
-	? {
-			[key in Options["name"]]: Options["fn"];
-		}
-	: object;
-
-export type DefineTranslationsConfig<
-	Locale extends string,
-	Translations extends AnyTranslations,
-	Options extends {
-		formatter: AnyFormatter;
-		locale: {
-			function?: Fn<LocaleGetter<Locale, false>, string>;
-			hook: Fn<LocaleGetter<Locale, boolean>, string>;
-			setter: LocaleSetter<Locale>;
-		};
-		translations: {
-			function?: Fn<TranslationsPickerAsync<Translations>, string>;
-			hook: Fn<TranslationsPicker<Translations, boolean>, string>;
-		};
-	},
-> = LocaleGetterHookBuilder<Options["locale"]["hook"]> &
-	LocaleGetterFunctionBuilder<Options["locale"]["function"]> &
-	TranslationsGetterHookBuilder<Options["translations"]["hook"]> &
-	TranslationsGetterFunctionBuilder<Options["translations"]["function"]> & {
-		setLocale: Options["locale"]["setter"];
-		t: Options["formatter"];
-	};
-
-export type WithLazyInit<
+export type InjectLazyInit<
 	Lazy extends boolean,
 	Locale extends string,
-	Input extends object,
-> = Lazy extends true
-	? {
-			init: (negotiators?: LocaleNegotiators<Locale>) => void;
-		} & Input
-	: Input;
+	Target extends object,
+> = Lazy extends true ? { init: LazyInit<Locale> } & Target : Target;
 
-export type CreateDefineTranslationsConfig = <
-	SignalLike extends boolean,
-	LocaleGetterHookName extends string,
-	TranslationsGetterHookName extends string,
-	LocaleGetterFunctionName extends string | undefined = undefined,
-	TranslationsGetterFunctionName extends string | undefined = undefined,
->(
-	options: CreateDefineTranslationsConfigOptions<
-		SignalLike,
-		LocaleGetterFunctionName,
-		LocaleGetterHookName,
-		TranslationsGetterFunctionName,
-		TranslationsGetterHookName
-	>,
-) => <
+export type DefineTranslationsConfig<
+	SignalInterface extends boolean,
+	InferredOptions extends Options<SignalInterface>,
+> = <
 	Loaders extends Record<string, LazyLoader>,
-	Locale extends keyof Loaders & string,
-	Translations extends Awaited<ReturnType<ValueOf<Loaders>>>,
 	Formatter extends AnyFormatter,
 	Lazy extends boolean = false,
+	TypedOptions extends RequiredDeep<
+		Options<SignalInterface, Loaders>
+	> = RequiredDeep<Options<SignalInterface, Loaders>>,
 >(
 	translationLoaders: Loaders,
 	options: {
-		cache?: Partial<Record<Locale, Translations>>;
+		cache?: Partial<ExtractTranslations<Loaders>>;
 		formatter: Formatter;
 		localeSource: LocaleNegotiators<keyof Loaders & string>;
 	},
 	lazy?: Lazy,
 ) => Simplify<
-	WithLazyInit<
+	InjectLazyInit<
 		Lazy,
-		Locale,
-		DefineTranslationsConfig<
-			Locale,
-			Translations,
-			{
-				formatter: Formatter;
-				locale: {
-					function: LocaleGetterFunctionName extends undefined
-						? undefined
-						: {
-								fn: LocaleGetter<Locale, false>;
-								name: LocaleGetterFunctionName;
-							};
-					hook: {
-						fn: LocaleGetter<Locale, SignalLike>;
-						name: LocaleGetterHookName;
-					};
-					setter: LocaleSetter<Locale>;
-				};
-				translations: {
-					function: TranslationsGetterFunctionName extends undefined
-						? undefined
-						: {
-								fn: TranslationsPickerAsync<Translations>;
-								name: TranslationsGetterFunctionName;
-							};
-					hook: {
-						fn: TranslationsPicker<Translations, SignalLike>;
-						name: TranslationsGetterHookName;
-					};
-				};
-			}
-		>
+		keyof Loaders & string,
+		{
+			t: Formatter;
+		} & FromNamedFactory<
+			InferredOptions["locale"]["hook"],
+			TypedOptions["locale"]["hook"]
+		> &
+			FromNamedFactory<
+				InferredOptions["locale"]["setter"],
+				TypedOptions["locale"]["setter"]
+			> &
+			FromNamedFactory<
+				InferredOptions["locale"]["fn"],
+				TypedOptions["locale"]["fn"]
+			> &
+			FromNamedFactory<
+				InferredOptions["translations"]["hook"],
+				TypedOptions["translations"]["hook"]
+			> &
+			FromNamedFactory<
+				InferredOptions["translations"]["fn"],
+				TypedOptions["translations"]["fn"]
+			>
 	>
 >;
 
+export type CreateDefineTranslationsConfig = <
+	SignalInterface extends boolean,
+	const InferredOptions extends Options<SignalInterface>,
+>(
+	hasSignalLikeInterface: SignalInterface,
+	options: InferredOptions,
+) => DefineTranslationsConfig<SignalInterface, InferredOptions>;
+
 export const createDefineTranslationsConfig: CreateDefineTranslationsConfig =
-	({
-		locale: {
-			fn: localeFn,
-			hook: { factory: localeHookFactory, name: localeHookName },
-			setter: localeSetter,
+	(
+		hasSignalLikeInterface,
+		{
+			locale: { fn: localeFn, hook: localeHookFactory, setter: localeSetter },
+			resources: { cache: globalCache, loaders },
+			translations: {
+				fn: translationsFn,
+				hook: translationsHookFactory,
+				loader: translationLoader,
+			},
 		},
-		resources: { cache: globalCache, loaders },
-		translations: {
-			fn: translationsFn,
-			hook: { factory: translationsHookFactory, name: translationsHookName },
-		},
-	}) =>
+	) =>
 	(
 		translationLoaders,
-		{ cache: initialCache, formatter: translator, localeSource: negotiators },
+		{ cache: initialCache, formatter, localeSource: negotiators },
 		lazy,
 	) => {
+		const initializedLocaleSetter = localeSetter[1]();
+
 		const init = (initNegotiators?: LocaleNegotiators<string>) => {
 			for (const [locale, loader] of Object.entries(translationLoaders)) {
 				loaders.set(locale, loader);
 			}
 
 			if (initialCache) {
-				for (const [locale, translations] of Object.entries(initialCache) as [
-					string,
-					AnyTranslations,
-				][]) {
-					globalCache.set(locale, translations);
+				for (const [locale, translations] of Object.entries(initialCache)) {
+					if (translations) {
+						globalCache.set(locale, translations);
+					}
 				}
 			}
 
@@ -295,7 +195,7 @@ export const createDefineTranslationsConfig: CreateDefineTranslationsConfig =
 
 				if (negotiatedLocale !== undefined) {
 					if (isKeyof(translationLoaders, negotiatedLocale)) {
-						localeSetter(negotiatedLocale);
+						initializedLocaleSetter(negotiatedLocale);
 
 						return;
 					} else {
@@ -325,19 +225,22 @@ export const createDefineTranslationsConfig: CreateDefineTranslationsConfig =
 			...(lazy && {
 				init,
 			}),
-			[localeHookName]: localeHookFactory(),
-			...(localeFn?.name && { [localeFn.name]: localeFn.factory() }),
-			setLocale: localeSetter,
-			[translationsHookName]: translationsHookFactory({
-				cache: globalCache,
-				loaders,
-			}),
-			...(translationsFn?.name && {
-				[translationsFn.name]: translationsFn.factory({
+			[localeHookFactory[0]]: localeHookFactory[1](),
+			...(localeFn && { [localeFn[0]]: localeFn[1]() }),
+			[localeSetter[0]]: initializedLocaleSetter,
+			[translationsHookFactory[0]]: translationsHookFactory[1](
+				translationLoader,
+				{
+					cache: globalCache,
+					loaders,
+				},
+			),
+			...(translationsFn && {
+				[translationsFn[0]]: translationsFn[1](translationLoader, {
 					cache: globalCache,
 					loaders,
 				}),
 			}),
-			t: translator,
+			t: formatter,
 		};
 	};

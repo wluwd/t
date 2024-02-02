@@ -4,85 +4,41 @@ import delve from "dlv";
 import { atom, getDefaultStore, useAtomValue } from "jotai";
 import { useMemo } from "react";
 
-import type { CreateDefineTranslationsConfigOptions } from "@wluwd/t";
-
 const $locale = atom<string | undefined>(undefined);
 const defaultStore = getDefaultStore();
 
-const loadAndCacheTranslations = async (
-	locale: string | undefined,
-	{
-		cache,
-		loaders,
-	}: CreateDefineTranslationsConfigOptions<
-		boolean,
-		string,
-		string,
-		string,
-		string
-	>["resources"],
-) => {
-	if (locale === undefined) {
-		throw new NoLocaleSet();
-	}
-
-	let translations = cache.get(locale);
-
-	if (translations !== undefined) {
-		return translations;
-	}
-
-	const loader = loaders.get(locale);
-
-	if (loader === undefined) {
-		throw new NoTranslationsSet({
-			availableLocales: Array.from(loaders.keys()),
-			desiredLocale: locale,
-		});
-	}
-
-	translations = await loader();
-
-	cache.set(locale, translations);
-
-	return translations;
-};
-
-export const defineTranslationsConfig = createDefineTranslationsConfig({
-	hasSignalLikeInterface: false,
+export const defineTranslationsConfig = createDefineTranslationsConfig(false, {
 	locale: {
-		fn: {
-			factory: () => () => defaultStore.get($locale)!,
-			name: "getLocale",
-		},
-		hook: {
-			factory: () => () => useAtomValue($locale)!,
-			name: "useLocale",
-		},
-		setter: (locale) => {
-			defaultStore.set($locale, locale);
-		},
+		fn: ["getLocale", () => () => defaultStore.get($locale)!],
+		hook: ["useLocale", () => () => useAtomValue($locale)!],
+		setter: [
+			"setLocale",
+			() => (locale) => {
+				defaultStore.set($locale, locale);
+			},
+		],
 	},
 	resources: {
 		cache: new Map(),
 		loaders: new Map(),
 	},
 	translations: {
-		fn: {
-			factory: (resources) => async (prefix) => {
+		fn: [
+			"getTranslations",
+			(loader, resources) => async (prefix) => {
 				const locale = defaultStore.get($locale);
 
 				// eslint-disable-next-line ts/no-unsafe-return
-				return delve(await loadAndCacheTranslations(locale, resources), prefix);
+				return delve(await loader(locale, resources), prefix);
 			},
-			name: "getTranslations",
-		},
-		hook: {
-			factory: (resources) => {
+		],
+		hook: [
+			"useTranslations",
+			(loader, resources) => {
 				const $translations = atom((get) => {
 					const locale = get($locale);
 
-					return loadAndCacheTranslations(locale, resources);
+					return loader(locale, resources);
 				});
 
 				return (prefix) => {
@@ -96,7 +52,32 @@ export const defineTranslationsConfig = createDefineTranslationsConfig({
 					);
 				};
 			},
-			name: "useTranslations",
+		],
+		loader: async (locale, { cache, loaders }) => {
+			if (locale === undefined) {
+				throw new NoLocaleSet();
+			}
+
+			let translations = cache.get(locale);
+
+			if (translations !== undefined) {
+				return translations;
+			}
+
+			const loader = loaders.get(locale);
+
+			if (loader === undefined) {
+				throw new NoTranslationsSet({
+					availableLocales: Array.from(loaders.keys()),
+					desiredLocale: locale,
+				});
+			}
+
+			translations = await loader();
+
+			cache.set(locale, translations);
+
+			return translations;
 		},
 	},
 });
