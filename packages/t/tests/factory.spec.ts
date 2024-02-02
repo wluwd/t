@@ -8,9 +8,24 @@ const enGB = { some: { deep: { string: "en-GB" } } };
 const enUS = { some: { deep: { string: "en-US" } } };
 
 const getMocks = () => {
+	let locale: string;
+
+	const cache = new Map();
+	const loaders = new Map();
+
+	const loader = vi.fn(
+		// eslint-disable-next-line ts/no-unsafe-return
+		(locale) => (locale && cache.get(locale)) ?? ({} as any),
+	);
+
+	// eslint-disable-next-line ts/no-unsafe-return
+	const getTranslations = vi.fn(() => loader(locale));
 	const useTranslations = vi.fn();
 	const useLocale = vi.fn();
-	const setLocale = vi.fn();
+	const setLocale = vi.fn((newLocale) => {
+		// eslint-disable-next-line ts/no-unsafe-assignment
+		locale = newLocale;
+	});
 
 	return [
 		{
@@ -18,13 +33,14 @@ const getMocks = () => {
 				hook: ["useLocale", vi.fn(() => useLocale)],
 				setter: ["setLocale", vi.fn(() => setLocale)],
 			},
-			resources: { cache: new Map(), loaders: new Map() },
+			resources: { cache, loaders },
 			translations: {
+				fn: ["getTranslations", vi.fn(() => getTranslations)],
 				hook: ["useTranslations", vi.fn(() => useTranslations)],
-				loader: vi.fn(() => ({})),
+				loader,
 			},
-		} satisfies Options,
-		{ setLocale, useLocale, useTranslations },
+		} as const satisfies Options,
+		{ getTranslations, setLocale, useLocale, useTranslations },
 		{
 			"en-GB": () => Promise.resolve(enGB),
 			"en-US": () => Promise.resolve(enUS),
@@ -57,11 +73,31 @@ it("creates a working `createTranslations` function", () => {
 		},
 	);
 	expect(translations).toEqual({
+		getTranslations: hooks.getTranslations,
 		setLocale: hooks.setLocale,
 		t: formatter,
 		useLocale: hooks.useLocale,
 		useTranslations: hooks.useTranslations,
 	});
+});
+
+it("uses initial cache", async () => {
+	const [options, _, loaders] = getMocks();
+
+	const enUSCached = { some: { deep: { string: "cached!" } } } as const;
+
+	const { getTranslations } = createDefineTranslationsConfig(false, options)(
+		loaders,
+		{
+			cache: {
+				"en-US": enUSCached,
+			},
+			formatter,
+			localeSource: ["en-US"],
+		},
+	);
+
+	expect(await getTranslations("some")).toBe(enUSCached);
 });
 
 describe("`defaultLocale`", () => {
