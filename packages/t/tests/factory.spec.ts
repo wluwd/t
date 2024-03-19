@@ -1,11 +1,11 @@
 import { NoLocaleFound, UnknownLocale, formatter } from "@wluwd/t-utils";
-import { createDefineTranslationsConfig } from "~/factory.ts";
+import { defineTranslationsConfigFactory } from "~/factory.ts";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Options } from "~/factory.ts";
 
-const enGB = { some: { deep: { string: "en-GB" } } };
-const enUS = { some: { deep: { string: "en-US" } } };
+const enGB = { some: { deep: { string: "en-GB" } } } as const;
+const enUS = { some: { deep: { string: "en-US" } } } as const;
 
 const getMocks = () => {
 	let locale: string;
@@ -30,15 +30,11 @@ const getMocks = () => {
 	return [
 		{
 			locale: {
-				hook: ["useLocale", vi.fn(() => useLocale)],
+				getter: ["useLocale", vi.fn(() => useLocale)] as const,
 				setter: ["setLocale", vi.fn(() => setLocale)],
 			},
 			resources: { cache, loaders },
-			translations: {
-				fn: ["getTranslations", vi.fn(() => getTranslations)],
-				hook: ["useTranslations", vi.fn(() => useTranslations)],
-				loader,
-			},
+			translations: ["useTranslations", vi.fn(() => useTranslations)],
 		} as const satisfies Options,
 		{ getTranslations, setLocale, useLocale, useTranslations },
 		{
@@ -52,28 +48,41 @@ const getMocks = () => {
 it("creates a working `createTranslations` function", () => {
 	const [factoryOptions, hooks, loaders, instanceOptions] = getMocks();
 
-	const translations = createDefineTranslationsConfig(false, factoryOptions)(
+	const translations = defineTranslationsConfigFactory(false, factoryOptions)(
 		loaders,
 		instanceOptions,
 	);
 
 	expect(factoryOptions.resources.loaders).toEqual(
-		new Map([
+		new Map<any, any>([
 			["en-GB", loaders["en-GB"]],
 			["en-US", loaders["en-US"]],
 		]),
 	);
 	expect(factoryOptions.resources.cache).toEqual(new Map());
-	expect(factoryOptions.locale.setter[1]).toHaveBeenCalled();
-	expect(factoryOptions.translations.hook[1]).toHaveBeenCalledWith(
-		factoryOptions.translations.loader,
-		{
-			cache: factoryOptions.resources.cache,
-			loaders: factoryOptions.resources.loaders,
+	expect(factoryOptions.locale.getter[1]).toHaveBeenCalledWith({
+		atoms: {
+			$locale: translations.$locale,
+			$translations: translations.$translations,
 		},
-	);
+	});
+	expect(factoryOptions.locale.setter[1]).toHaveBeenCalledWith({
+		atoms: {
+			$locale: translations.$locale,
+			$translations: translations.$translations,
+		},
+	});
+	expect(factoryOptions.translations[1]).toHaveBeenCalledWith({
+		atoms: {
+			$locale: translations.$locale,
+			$translations: translations.$translations,
+		},
+		cache: factoryOptions.resources.cache,
+		loaders: factoryOptions.resources.loaders,
+	});
 	expect(translations).toEqual({
-		getTranslations: hooks.getTranslations,
+		$locale: translations.$locale,
+		$translations: translations.$translations,
 		setLocale: hooks.setLocale,
 		t: formatter,
 		useLocale: hooks.useLocale,
@@ -86,10 +95,11 @@ it("uses initial cache", async () => {
 
 	const enUSCached = { some: { deep: { string: "cached!" } } } as const;
 
-	const { getTranslations } = createDefineTranslationsConfig(false, options)(
+	const { $translations } = defineTranslationsConfigFactory(false, options)(
 		loaders,
 		{
 			cache: {
+				// @ts-expect-error translations don't match
 				"en-US": enUSCached,
 			},
 			formatter,
@@ -97,13 +107,13 @@ it("uses initial cache", async () => {
 		},
 	);
 
-	expect(await getTranslations("some")).toBe(enUSCached);
+	expect(await $translations.get()).toBe(enUSCached);
 });
 
 it("can be lazy initialized", async () => {
-	const [options, hooks, loaders] = getMocks();
+	const [options, _, loaders] = getMocks();
 
-	const { init } = createDefineTranslationsConfig(false, options)(
+	const { $locale, init } = defineTranslationsConfigFactory(false, options)(
 		loaders,
 		{
 			formatter,
@@ -112,41 +122,47 @@ it("can be lazy initialized", async () => {
 		true,
 	);
 
-	expect(hooks.setLocale).toHaveBeenCalledTimes(0);
+	expect($locale.get()).toBe(undefined);
 
 	init(["en-GB"]);
 
-	expect(hooks.setLocale).toHaveBeenLastCalledWith("en-GB");
+	expect($locale.get()).toBe("en-GB");
 });
 
 describe("`defaultLocale`", () => {
-	it("calls `locale.setter` when it's a string", () => {
-		const [options, { setLocale }, loaders] = getMocks();
+	it("sets the locale when it's a string", () => {
+		const [options, _, loaders] = getMocks();
 
-		createDefineTranslationsConfig(false, options)(loaders, {
-			formatter,
-			localeSource: ["en-GB"],
-		});
+		const { $locale } = defineTranslationsConfigFactory(false, options)(
+			loaders,
+			{
+				formatter,
+				localeSource: ["en-GB"],
+			},
+		);
 
-		expect(setLocale).toHaveBeenCalledWith("en-GB");
+		expect($locale.get()).toBe("en-GB");
 	});
 
 	it("skips `false` in negotiators", async () => {
-		const [options, { setLocale }, loaders] = getMocks();
+		const [options, _, loaders] = getMocks();
 
-		createDefineTranslationsConfig(false, options)(loaders, {
-			formatter,
-			localeSource: [false, "en-GB"],
-		});
+		const { $locale } = defineTranslationsConfigFactory(false, options)(
+			loaders,
+			{
+				formatter,
+				localeSource: [false, "en-GB"],
+			},
+		);
 
-		expect(setLocale).toHaveBeenCalledWith("en-GB");
+		expect($locale.get()).toBe("en-GB");
 	});
 
 	it("throws `UnknownDefaultLocale` when using an unknown locale", () => {
 		const [options, _, loaders] = getMocks();
 
 		try {
-			createDefineTranslationsConfig(false, options)(loaders, {
+			defineTranslationsConfigFactory(false, options)(loaders, {
 				// @ts-expect-error unknown locale
 				localeSource: ["it-IT"],
 			});
@@ -166,7 +182,7 @@ describe("`defaultLocale`", () => {
 		const negotiators = [() => undefined];
 
 		try {
-			createDefineTranslationsConfig(false, options)(loaders, {
+			defineTranslationsConfigFactory(false, options)(loaders, {
 				formatter,
 				// @ts-expect-error no fallback locale
 				localeSource: negotiators,

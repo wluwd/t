@@ -1,83 +1,77 @@
-import { createDefineTranslationsConfig } from "@wluwd/t";
-import { NoLocaleSet, NoTranslationsSet } from "@wluwd/t-utils";
+import { useStore } from "@nanostores/react";
+import { defineTranslationsConfigFactory } from "@wluwd/t";
 import delve from "dlv";
-import { atom, getDefaultStore, useAtomValue } from "jotai";
-import { useMemo } from "react";
+import ReactExports, { useMemo } from "react";
 
-const $locale = atom<string | undefined>(undefined);
-const defaultStore = getDefaultStore();
+// `use` polyfill by jotai, https://github.com/pmndrs/jotai/blob/bae472500dea29ba876d80b8c066c54816970862/src/react/useAtomValue.ts#L13-L42
+// eslint-disable-next-line ts/no-unsafe-assignment
+const use =
+	// @ts-expect-error use is still not available in React 18
+	ReactExports.use ||
+	(<T>(
+		promise: PromiseLike<T> & {
+			reason?: unknown;
+			status?: "fulfilled" | "pending" | "rejected";
+			value?: T;
+		},
+	): T => {
+		if (promise.status === "pending") {
+			// eslint-disable-next-line ts/no-throw-literal
+			throw promise;
+		} else if (promise.status === "fulfilled") {
+			return promise.value as T;
+		} else if (promise.status === "rejected") {
+			throw promise.reason;
+		} else {
+			promise.status = "pending";
+			promise.then(
+				(v) => {
+					promise.status = "fulfilled";
+					promise.value = v;
+				},
+				(e) => {
+					promise.status = "rejected";
+					promise.reason = e;
+				},
+			);
+			// eslint-disable-next-line ts/no-throw-literal
+			throw promise;
+		}
+	});
 
-export const defineTranslationsConfig = createDefineTranslationsConfig(false, {
+export const defineTranslationsConfig = defineTranslationsConfigFactory(false, {
 	locale: {
-		fn: ["getLocale", () => () => defaultStore.get($locale)!],
-		hook: ["useLocale", () => () => useAtomValue($locale)!],
+		getter: [
+			"useLocale",
+			({ atoms: { $locale } }) =>
+				() =>
+					useStore($locale)!,
+		],
 		setter: [
 			"setLocale",
-			() => (locale) => {
-				defaultStore.set($locale, locale);
-			},
+			({ atoms: { $locale } }) =>
+				(locale) => {
+					$locale.set(locale);
+				},
 		],
 	},
 	resources: {
 		cache: new Map(),
 		loaders: new Map(),
 	},
-	translations: {
-		fn: [
-			"getTranslations",
-			(loader, resources) => async (prefix) => {
-				const locale = defaultStore.get($locale);
+	translations: [
+		"useTranslations",
+		({ atoms: { $translations } }) =>
+			(prefix) => {
+				// eslint-disable-next-line ts/no-unsafe-assignment, ts/no-unsafe-call
+				const translations = use(useStore($translations));
 
 				// eslint-disable-next-line ts/no-unsafe-return
-				return delve(await loader(locale, resources), prefix);
+				return useMemo(
+					// eslint-disable-next-line ts/no-unsafe-return, ts/no-unsafe-argument
+					() => delve(translations, prefix),
+					[prefix, translations],
+				);
 			},
-		],
-		hook: [
-			"useTranslations",
-			(loader, resources) => {
-				const $translations = atom((get) => {
-					const locale = get($locale);
-
-					return loader(locale, resources);
-				});
-
-				return (prefix) => {
-					const translations = useAtomValue($translations);
-
-					// eslint-disable-next-line ts/no-unsafe-return
-					return useMemo(
-						// eslint-disable-next-line ts/no-unsafe-return
-						() => delve(translations, prefix),
-						[prefix, translations],
-					);
-				};
-			},
-		],
-		loader: async (locale, { cache, loaders }) => {
-			if (locale === undefined) {
-				throw new NoLocaleSet();
-			}
-
-			let translations = cache.get(locale);
-
-			if (translations !== undefined) {
-				return translations;
-			}
-
-			const loader = loaders.get(locale);
-
-			if (loader === undefined) {
-				throw new NoTranslationsSet({
-					availableLocales: Array.from(loaders.keys()),
-					desiredLocale: locale,
-				});
-			}
-
-			translations = await loader();
-
-			cache.set(locale, translations);
-
-			return translations;
-		},
-	},
+	],
 });

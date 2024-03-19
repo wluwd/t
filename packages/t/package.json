@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@wluwd/t-utils": "workspace:*",
+    "nanostores": "^0.10.0",
     "type-fest": "^4.8.3"
   }
 }
