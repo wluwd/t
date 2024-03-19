@@ -6,7 +6,7 @@ import {
 	lazyTranslations,
 } from "@wluwd/t-utils";
 import { defineTranslationsConfig } from "~/index.ts";
-import { Component } from "react";
+import { Component, Suspense, startTransition } from "react";
 import { describe, expect, it } from "vitest";
 
 import type { ReactNode } from "react";
@@ -57,10 +57,8 @@ describe("throws", () => {
 	});
 
 	it("`NoTranslationsSet` when trying to load translations that have no loader", async () => {
-		const { setLocale, useLocale, useTranslations } = defineTranslationsConfig(
-			translations,
-			{ formatter, localeSource: [] },
-		);
+		const { $translations, setLocale, useLocale, useTranslations } =
+			defineTranslationsConfig(translations, { formatter, localeSource: [] });
 
 		const { result: locale } = renderHook(() => useLocale());
 		expect(locale.current).toBe(undefined);
@@ -73,8 +71,12 @@ describe("throws", () => {
 			),
 		});
 
-		// @ts-expect-error testing undefined translations
-		setLocale("en-AU");
+		startTransition(() => {
+			// @ts-expect-error testing undefined translations
+			setLocale("en-AU");
+		});
+
+		$translations.get().catch(() => {});
 
 		await waitFor(() =>
 			expect(error.current).toBeInstanceOf(NoTranslationsSet),
@@ -94,8 +96,9 @@ it("creates working hooks", async () => {
 
 	expect(locale.current).toBe("en-GB");
 
-	const { result: translation } = renderHook(() =>
-		useTranslations("some.deep"),
+	const { result: translation } = renderHook(
+		() => useTranslations("some.deep"),
+		{ wrapper: ({ children }) => <Suspense>{children}</Suspense> },
 	);
 
 	expect(translation.current).toBe(null);
@@ -121,8 +124,8 @@ it("creates working hooks", async () => {
 	);
 });
 
-it("creates working functions", async () => {
-	const { getLocale, getTranslations, setLocale } = defineTranslationsConfig(
+it("expose working atoms", async () => {
+	const { $locale, $translations, setLocale } = defineTranslationsConfig(
 		translations,
 		{
 			formatter,
@@ -130,16 +133,22 @@ it("creates working functions", async () => {
 		},
 	);
 
-	expect(getLocale()).toBe("en-US");
-	expect(await getTranslations("some")).toBe(enUS.default.some);
+	expect($locale.get()).toBe("en-US");
+	expect((await $translations.get()).some).toBe(enUS.default.some);
 
 	setLocale("en-GB");
 
-	expect(getLocale()).toBe("en-GB");
-	expect(await getTranslations("some")).toBe(enGB.default.some);
+	expect($locale.get()).toBe("en-GB");
+
+	const promise = $translations.get();
 
 	setLocale("en-US");
 
-	expect(getLocale()).toBe("en-US");
-	expect(await getTranslations("some")).toBe(enUS.default.some);
+	expect($locale.get()).toBe("en-US");
+	expect((await promise).some).toBe(enUS.default.some);
+
+	setLocale("en-GB");
+
+	expect($locale.get()).toBe("en-GB");
+	expect((await $translations.get()).some).toBe(enGB.default.some);
 });

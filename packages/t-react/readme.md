@@ -4,15 +4,9 @@
 
 ## Install
 
-Using your favorite package manager, install: `@wluwd/t-react @wluwd/t-utils`.
+Using your favorite package manager, install: `@wluwd/t-react`.
 
-> [!NOTE]
-> You're not required to install `@wluwd/t-utils`, but we recommend it as a helpful starting point for additional utilities and features.
-
-The React adapter has two peer dependencies which you need to install: the first is `react` itself, the second is [`jotai`](https://jotai.org).
-
-> [!NOTE]
-> We will likely transition from Jotai to [Nano Stores](https://github.com/nanostores/nanostores) once [`use`](https://react.dev/reference/react/use) lands in a stable release.
+The React adapter has one peer dependency which you need to install: `react` itself.
 
 ## Usage
 
