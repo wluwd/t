@@ -1,3 +1,4 @@
+import { expect, it } from "vitest";
 import {
 	NoLocaleFound,
 	NoLocaleSet,
@@ -5,7 +6,6 @@ import {
 	UnknownLocale,
 	isLocaleError,
 } from "~/error.ts";
-import { expect, it } from "vitest";
 
 it("`isLocaleError` recognized `NoLocaleFound`", async () => {
 	expect(

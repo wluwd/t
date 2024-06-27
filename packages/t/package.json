@@ -1,31 +1,31 @@
 {
-  "name": "@wluwd/t",
-  "type": "module",
-  "version": "0.1.0",
-  "description": "",
-  "author": "Raul Macarie <npm@macarie.me>",
-  "license": "MIT",
-  "homepage": "https://github.com/wluwd/t",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/wluwd/t.git",
-    "directory": "packages/t"
-  },
-  "bugs": {
-    "url": "https://github.com/wluwd/t/issues"
-  },
-  "exports": {
-    ".": {
-      "types": "./source/index.ts",
-      "import": "./source/index.ts"
-    }
-  },
-  "scripts": {
-    "build": "tsup",
-    "typecheck": "tsc"
-  },
-  "dependencies": {
-    "@wluwd/t-utils": "workspace:*",
-    "type-fest": "^4.8.3"
-  }
+	"name": "@wluwd/t",
+	"type": "module",
+	"version": "0.1.0",
+	"description": "",
+	"author": "Raul Macarie <npm@macarie.me>",
+	"license": "MIT",
+	"homepage": "https://github.com/wluwd/t",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/wluwd/t.git",
+		"directory": "packages/t"
+	},
+	"bugs": {
+		"url": "https://github.com/wluwd/t/issues"
+	},
+	"exports": {
+		".": {
+			"types": "./source/index.ts",
+			"import": "./source/index.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsup",
+		"typecheck": "tsc"
+	},
+	"dependencies": {
+		"@wluwd/t-utils": "workspace:*",
+		"type-fest": "^4.8.3"
+	}
 }

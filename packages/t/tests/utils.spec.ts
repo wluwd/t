@@ -1,5 +1,5 @@
-import { isKeyof } from "~/utils.ts";
 import { describe, expect, it } from "vitest";
+import { isKeyof } from "~/utils.ts";
 
 describe("`isKeyof`", () => {
 	it("should return `true` when `needle` is keyof `haystack`", () => {

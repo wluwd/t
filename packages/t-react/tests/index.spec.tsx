@@ -5,9 +5,9 @@ import {
 	formatter,
 	lazyTranslations,
 } from "@wluwd/t-utils";
-import { defineTranslationsConfig } from "~/index.ts";
 import { Component } from "react";
 import { describe, expect, it } from "vitest";
+import { defineTranslationsConfig } from "~/index.ts";
 
 import type { ReactNode } from "react";
 

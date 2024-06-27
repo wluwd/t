@@ -9,7 +9,9 @@ const defaultStore = getDefaultStore();
 
 export const defineTranslationsConfig = createDefineTranslationsConfig(false, {
 	locale: {
+		// biome-ignore lint/style/noNonNullAssertion: the value should be set
 		fn: ["getLocale", () => () => defaultStore.get($locale)!],
+		// biome-ignore lint/style/noNonNullAssertion: the value should be set
 		hook: ["useLocale", () => () => useAtomValue($locale)!],
 		setter: [
 			"setLocale",

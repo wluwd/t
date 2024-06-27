@@ -1,6 +1,6 @@
 import { NoLocaleFound, UnknownLocale, formatter } from "@wluwd/t-utils";
-import { createDefineTranslationsConfig } from "~/factory.ts";
 import { describe, expect, it, vi } from "vitest";
+import { createDefineTranslationsConfig } from "~/factory.ts";
 
 import type { Options } from "~/factory.ts";
 

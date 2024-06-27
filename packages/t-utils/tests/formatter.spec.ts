@@ -1,5 +1,5 @@
-import { formatter } from "~/formatter.ts";
 import { expect, it } from "vitest";
+import { formatter } from "~/formatter.ts";
 
 it("swaps `{{placeholder}}` with the `placeholder` property provided", () => {
 	expect(formatter("{{placeholder}}", { placeholder: "string" })).toBe(

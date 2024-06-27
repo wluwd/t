@@ -40,7 +40,7 @@ export class UnknownLocale extends Error {
 export class NoLocaleSet extends Error {
 	constructor(options?: ErrorOptions) {
 		super(
-			`Attempted to access translations without a specified locale.\n\nThis error typically occurs due to one of the following reasons:\n\n1. The \`defaultLocale\` was unintentionally omitted.\n2. The \`defaultLocale\` was intentionally omitted, but \`setLocale\` was not called — either by mistake or due to a race condition.`,
+			"Attempted to access translations without a specified locale.\n\nThis error typically occurs due to one of the following reasons:\n\n1. The `defaultLocale` was unintentionally omitted.\n2. The `defaultLocale` was intentionally omitted, but `setLocale` was not called — either by mistake or due to a race condition.",
 			options,
 		);
 	}

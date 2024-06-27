@@ -1,5 +1,5 @@
 // @info this file does what `publishConfig` does, but it's automated and allows us to keep the package files clean
-import { access, constants, readdir, writeFile } from "node:fs/promises";
+import { constants, access, readdir, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -31,10 +31,7 @@ await Promise.all(
 				assert: {
 					type: "json",
 				},
-			}).then(
-				(exports) =>
-					exports.default,
-			),
+			}).then((exports) => exports.default),
 		);
 
 		await Promise.all(

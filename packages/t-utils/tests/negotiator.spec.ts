@@ -1,5 +1,5 @@
-import { browser } from "~/negotiator.ts";
 import { expect, it } from "vitest";
+import { browser } from "~/negotiator.ts";
 
 it("`browser` returns expected locale from `navigator.languages`", async () => {
 	// @info statically set by happy-dom, should never fail

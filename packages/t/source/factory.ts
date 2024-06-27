@@ -1,13 +1,6 @@
-import { isKeyof } from "./utils.ts";
 import { NoLocaleFound, UnknownLocale } from "@wluwd/t-utils";
+import { isKeyof } from "./utils.ts";
 
-import type {
-	AnyFormatter,
-	ExtractTranslations,
-	FromNamedFactory,
-	NamedFactory,
-	PathsToBranches,
-} from "./utils.ts";
 import type {
 	AnyTranslations,
 	LazyLoader,
@@ -20,6 +13,13 @@ import type {
 	Simplify,
 	ValueOf,
 } from "type-fest";
+import type {
+	AnyFormatter,
+	ExtractTranslations,
+	FromNamedFactory,
+	NamedFactory,
+	PathsToBranches,
+} from "./utils.ts";
 
 export type TranslationsPicker<
 	SignalInterface extends boolean,
@@ -198,13 +198,13 @@ export const createDefineTranslationsConfig: CreateDefineTranslationsConfig =
 						initializedLocaleSetter(negotiatedLocale);
 
 						return;
-					} else {
-						throw new UnknownLocale({
-							availableLocales: Object.keys(translationLoaders),
-							desiredLocale: negotiatedLocale,
-							negotiator,
-						});
 					}
+
+					throw new UnknownLocale({
+						availableLocales: Object.keys(translationLoaders),
+						desiredLocale: negotiatedLocale,
+						negotiator,
+					});
 				}
 			}
 

@@ -1,19 +1,19 @@
 {
-  "type": "module",
-  "packageManager": "pnpm@8.12.1+sha256.28ca61ece5a496148b73fabc9afb820f9c3fec4f55f04ce45a2cea0a5219f2e1",
-  "scripts": {
-    "test": "vitest",
-    "prepare-packages": "node --no-warnings scripts/prepare-packages.js",
-    "check": "biome check"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
-    "@testing-library/react": "^14.1.2",
-    "@types/node": "^20.10.4",
-    "@vitest/coverage-v8": "^1.0.4",
-    "happy-dom": "^12.10.3",
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.3",
-    "vitest": "^1.0.4"
-  }
+	"type": "module",
+	"packageManager": "pnpm@8.12.1+sha256.28ca61ece5a496148b73fabc9afb820f9c3fec4f55f04ce45a2cea0a5219f2e1",
+	"scripts": {
+		"test": "vitest",
+		"prepare-packages": "node --no-warnings scripts/prepare-packages.js",
+		"check": "biome check"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3",
+		"@testing-library/react": "^14.1.2",
+		"@types/node": "^20.10.4",
+		"@vitest/coverage-v8": "^1.0.4",
+		"happy-dom": "^12.10.3",
+		"tsup": "^8.0.1",
+		"typescript": "^5.3.3",
+		"vitest": "^1.0.4"
+	}
 }
