@@ -22,8 +22,6 @@
   },
   "scripts": {
     "build": "tsup",
-    "prelint": "prettier --check .",
-    "lint": "eslint .",
     "typecheck": "tsc"
   },
   "peerDependencies": {

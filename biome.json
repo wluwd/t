@@ -1,0 +1,38 @@
+{
+	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"defaultBranch": "trunk",
+		"useIgnoreFile": true
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"formatter": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"suspicious": {
+				"noExplicitAny": "off"
+			}
+		}
+	},
+	"overrides": [
+		{
+			"include": [".vscode/*.json", "tsconfig.json", "tsconfig.*.json"],
+			"json": {
+				"parser": {
+					"allowComments": true,
+					"allowTrailingCommas": true
+				},
+				"formatter": {
+					"trailingCommas": "all"
+				}
+			}
+		}
+	]
+}

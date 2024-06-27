@@ -39,8 +39,6 @@ You have two options:
 
 Here's a glimpse of what your code could look like:
 
-<!-- eslint-skip -->
-
 ```ts
 import { defineTranslationsConfig } from "@wluwd/t-[adapter]";
 import { browser, lazyTranslations, formatter } from "@wluwd/t-utils";

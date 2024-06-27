@@ -28,7 +28,6 @@ export const defineTranslationsConfig = createDefineTranslationsConfig(false, {
 			(loader, resources) => async (prefix) => {
 				const locale = defaultStore.get($locale);
 
-				// eslint-disable-next-line ts/no-unsafe-return
 				return delve(await loader(locale, resources), prefix);
 			},
 		],
@@ -44,9 +43,7 @@ export const defineTranslationsConfig = createDefineTranslationsConfig(false, {
 				return (prefix) => {
 					const translations = useAtomValue($translations);
 
-					// eslint-disable-next-line ts/no-unsafe-return
 					return useMemo(
-						// eslint-disable-next-line ts/no-unsafe-return
 						() => delve(translations, prefix),
 						[prefix, translations],
 					);

@@ -1,7 +1,3 @@
 {
-	"recommendations": [
-		"Gruntfuggly.todo-tree",
-		"dbaeumer.vscode-eslint",
-		"esbenp.prettier-vscode",
-	],
+	"recommendations": ["Gruntfuggly.todo-tree", "biomejs.biome"],
 }

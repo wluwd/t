@@ -26,7 +26,6 @@ await Promise.all(
 		const pathToDist = resolve(pathToPackage, "dist");
 
 		/** @type {import("type-fest").PackageJson} */
-		// eslint-disable-next-line ts/no-unsafe-assignment
 		const packageConfig = structuredClone(
 			await import(pathToPackageFile, {
 				assert: {
@@ -34,7 +33,6 @@ await Promise.all(
 				},
 			}).then(
 				(exports) =>
-					// eslint-disable-next-line ts/no-unsafe-return, ts/no-unsafe-member-access
 					exports.default,
 			),
 		);
@@ -61,7 +59,6 @@ await Promise.all(
 
 							await access(resolve(pathToPackage, newPath), constants.R_OK);
 
-							// eslint-disable-next-line ts/no-unsafe-member-access
 							packageConfig.exports[exportPath][exportType] = newPath;
 						}),
 					);

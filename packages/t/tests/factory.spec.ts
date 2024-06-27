@@ -14,16 +14,13 @@ const getMocks = () => {
 	const loaders = new Map();
 
 	const loader = vi.fn(
-		// eslint-disable-next-line ts/no-unsafe-return
 		(locale) => (locale && cache.get(locale)) ?? ({} as any),
 	);
 
-	// eslint-disable-next-line ts/no-unsafe-return
 	const getTranslations = vi.fn(() => loader(locale));
 	const useTranslations = vi.fn();
 	const useLocale = vi.fn();
 	const setLocale = vi.fn((newLocale) => {
-		// eslint-disable-next-line ts/no-unsafe-assignment
 		locale = newLocale;
 	});
 

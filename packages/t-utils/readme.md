@@ -16,8 +16,6 @@ Placeholders, denoted by `{{` and `}}`, indicate the locations where replacement
 
 **Example:**
 
-<!-- eslint-skip -->
-
 ```ts
 const translation = "Hello, {{name}}! Welcome to {{city}}.";
 const data = {
@@ -36,8 +34,6 @@ The loader function should be an asynchronous function that imports a translatio
 
 **Example:**
 
-<!-- eslint-skip -->
-
 ```ts
 lazyTranslations(async () => ({
 	default: {
@@ -53,8 +49,6 @@ A locale negotiator that automatically uses the browser's preferred languages ob
 This negotiator is useful for scenarios where you want to set the default locale based on the user's browser language preferences.
 
 **Example:**
-
-<!-- eslint-skip -->
 
 ```ts
 import { defineTranslationsConfig } from "@wluwd/t-[adapter]";

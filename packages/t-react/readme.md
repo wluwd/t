@@ -16,8 +16,6 @@ The React adapter has two peer dependencies which you need to install: the first
 
 ## Usage
 
-<!-- eslint-skip -->
-
 ```ts
 // translations.ts
 import { defineTranslationsConfig } from "@wluwd/t-react";
@@ -41,8 +39,6 @@ export const {
 	},
 );
 ```
-
-<!-- eslint-skip -->
 
 ```tsx
 // article/published-by.tsx
@@ -100,8 +96,6 @@ Extends: `boolean | undefined`
 When this is set to `true`, initiates the translator in _lazy mode_.
 
 Alongside the other functions and hooks, `defineTranslationsConfig` will return an `init` function with the following signature:
-
-<!-- eslint-skip -->
 
 ```ts
 type Init = (negotiators?: LocaleNegotiators<Locale>) => void;

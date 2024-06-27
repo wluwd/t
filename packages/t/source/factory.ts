@@ -220,7 +220,6 @@ export const createDefineTranslationsConfig: CreateDefineTranslationsConfig =
 			init();
 		}
 
-		// eslint-disable-next-line ts/no-unsafe-return
 		return <any>{
 			...(lazy && {
 				init,
