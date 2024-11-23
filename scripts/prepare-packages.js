@@ -34,6 +34,10 @@ await Promise.all(
 			}).then((exports) => exports.default),
 		);
 
+		if (packageConfig.exports === undefined) {
+			return;
+		}
+
 		await Promise.all(
 			Object.entries(packageConfig.exports).map(
 				async ([exportPath, exportTypes]) => {
@@ -43,6 +47,10 @@ await Promise.all(
 
 					await Promise.all(
 						Object.entries(exportTypes).map(async ([exportType, filepath]) => {
+							if (typeof filepath !== "string") {
+								return;
+							}
+
 							const newPath = `./${relative(
 								pathToPackage,
 								resolve(
@@ -56,6 +64,7 @@ await Promise.all(
 
 							await access(resolve(pathToPackage, newPath), constants.R_OK);
 
+							// @ts-expect-error this cannot be `undefined`
 							packageConfig.exports[exportPath][exportType] = newPath;
 						}),
 					);
